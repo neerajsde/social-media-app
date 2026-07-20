@@ -1,4 +1,3 @@
-// ─── User Types ──────────────────────────────────────
 export interface User {
   id: string;
   username: string;
@@ -16,6 +15,9 @@ export interface User {
   followingCount?: number;
   postCount?: number;
   profile?: UserProfile;
+  isFollowing?: boolean;
+  follower?: number;
+  following?: number;
 }
 
 export interface UserProfile {
@@ -114,6 +116,13 @@ export interface Post {
   author: PostAuthor;
   tags?: string[];
   parentPost?: Post;
+  video?: {
+    hlsMasterKey?: string;
+    thumbnail?: string;
+    durationSec?: number;
+    originalVideo?: string;
+    status?: string;
+  };
 }
 
 export interface PostAuthor {

@@ -7,7 +7,11 @@ export const userApi = baseApi.injectEndpoints({
       query: () => '/user/profile',
       providesTags: ['Profile'],
     }),
-    updateProfile: builder.mutation<{ success: boolean; message: string; data: any }, Partial<User>>({
+    getUserProfileByUsername: builder.query<{ success: boolean; user: User }, string>({
+      query: (username) => `/user/profile/${username}`,
+      providesTags: (result, error, username) => [{ type: 'Profile', id: username }],
+    }),
+    updateProfile: builder.mutation<{ success: boolean; message: string; data: any }, any>({
       query: (body) => ({
         url: '/user/profile',
         method: 'PUT',
@@ -31,7 +35,7 @@ export const userApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ['Profile'],
     }),
-    updateSocialLinks: builder.mutation<{ success: boolean }, Record<string, string>>({
+    updateSocialLinks: builder.mutation<{ success: boolean }, Record<string, string | null>>({
       query: (body) => ({
         url: '/user/social-links',
         method: 'PUT',
@@ -84,6 +88,7 @@ export const userApi = baseApi.injectEndpoints({
 
 export const {
   useGetProfileQuery,
+  useGetUserProfileByUsernameQuery,
   useUpdateProfileMutation,
   useUpdateAvatarMutation,
   useUpdateBannerMutation,

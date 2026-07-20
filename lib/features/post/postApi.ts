@@ -7,6 +7,10 @@ export const postApi = baseApi.injectEndpoints({
       query: ({ page = 1, limit = 10 }) => `/post/feed?page=${page}&limit=${limit}`,
       providesTags: ['Feed'],
     }),
+    getUserPosts: builder.query<{ success: boolean; posts: Post[]; meta: any }, { userId: string; page?: number; limit?: number }>({
+      query: ({ userId, page = 1, limit = 20 }) => `/post/user/${userId}?page=${page}&limit=${limit}`,
+      providesTags: (result, error, { userId }) => ['Feed', { type: 'Feed', id: `User-${userId}` }],
+    }),
     getPost: builder.query<{ success: boolean; data: Post }, string>({
       query: (postId) => `/post/${postId}`,
       providesTags: (_result, _err, id) => [{ type: 'Post', id }],
@@ -108,6 +112,7 @@ export const postApi = baseApi.injectEndpoints({
 
 export const {
   useGetFeedQuery,
+  useGetUserPostsQuery,
   useGetPostQuery,
   useGetPostCommentsQuery,
   useCreatePostMutation,
