@@ -175,12 +175,18 @@ export interface PaginatedResponse<T> {
 
 export interface FeedResponse {
   success: boolean;
-  message: string;
+  message?: string;
   data: Post[];
-  page: number;
-  limit: number;
-  total: number;
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+    hasMore: boolean;
+  };
 }
+
+export type FeedType = 'foryou' | 'following';
 
 // ─── Search Types ────────────────────────────────────
 export type SearchType = 'foryou' | 'account' | 'trending' | 'tags' | 'posts';
