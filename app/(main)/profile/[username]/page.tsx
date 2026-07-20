@@ -1,7 +1,6 @@
 'use client';
 
 import { use, useState, useEffect, useRef } from 'react';
-import Link from 'next/navigation';
 import LinkNext from 'next/link';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/lib/store';

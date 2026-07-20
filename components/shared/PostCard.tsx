@@ -13,6 +13,7 @@ import { formatCount, timeAgo } from '@/lib/mock-data';
 import type { Post } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import AuthDialog from '@/components/shared/AuthDialog';
+import { toast } from 'sonner';
 
 interface PostCardProps {
   post: Post;
@@ -38,7 +39,7 @@ export default function PostCard({ post }: PostCardProps) {
   const [likeCount, setLikeCount] = useState(initialLikeCount);
   const [bookmarked, setBookmarked] = useState(post.isBookmarked || false);
   const [showAuthDialog, setShowAuthDialog] = useState(false);
-  const { isAuthenticated } = useAppSelector((state) => state.auth);
+  const { isAuthenticated, user: currentUser } = useAppSelector((state) => state.auth);
 
   const handleLike = () => {
     if (!isAuthenticated) { setShowAuthDialog(true); return; }
@@ -51,10 +52,15 @@ export default function PostCard({ post }: PostCardProps) {
     setBookmarked(!bookmarked);
   };
 
-  const handleProtectedAction = () => {
-    if (!isAuthenticated) { setShowAuthDialog(true); return; }
+  const handleProtectedAction = (message: string) => {
+    if (!isAuthenticated) {
+      setShowAuthDialog(true);
+      return;
+    }
+    toast(message);
   };
 
+  const isPostOwner = post.isOwnPost || author.id === currentUser?.id || post.user?.id === currentUser?.id;
   const authorName = author.first_name 
     ? `${author.first_name} ${author.last_name || ''}`.trim()
     : author.username;
@@ -95,9 +101,25 @@ export default function PostCard({ post }: PostCardProps) {
                 <MoreHorizontal className="w-4 h-4" />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem onClick={handleProtectedAction}>Report post</DropdownMenuItem>
-                <DropdownMenuItem>Copy link</DropdownMenuItem>
-                <DropdownMenuItem onClick={handleProtectedAction}>Not interested</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleProtectedAction('Post reported')}>
+                  Report post
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => window.navigator.clipboard?.writeText(`${window.location.origin}/post/${post.id}`)}>
+                  Copy link
+                </DropdownMenuItem>
+                {isPostOwner && (
+                  <>
+                    <DropdownMenuItem onClick={() => toast('Edit post action coming soon')}>
+                      Edit post
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => toast('Delete post action coming soon')}>
+                      Delete post
+                    </DropdownMenuItem>
+                  </>
+                )}
+                <DropdownMenuItem onClick={() => handleProtectedAction('Marked as not interested')}>
+                  Not interested
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -168,11 +190,11 @@ export default function PostCard({ post }: PostCardProps) {
                 <MessageCircle className="w-4 h-4" />
                 <span>{formatCount(commentsCount)}</span>
               </Button>
-              <Button variant="ghost" size="sm" className="h-8 px-2 gap-1.5 text-xs text-muted-foreground" onClick={handleProtectedAction}>
+              <Button variant="ghost" size="sm" className="h-8 px-2 gap-1.5 text-xs text-muted-foreground" onClick={() => handleProtectedAction('Post shared')}>
                 <Repeat2 className="w-4 h-4" />
                 <span>{formatCount(sharesCount)}</span>
               </Button>
-              <Button variant="ghost" size="sm" className="h-8 px-2 gap-1.5 text-xs text-muted-foreground" onClick={handleProtectedAction}>
+              <Button variant="ghost" size="sm" className="h-8 px-2 gap-1.5 text-xs text-muted-foreground" onClick={() => handleProtectedAction('Share dialog opened')}>
                 <Share2 className="w-4 h-4" />
               </Button>
             </div>

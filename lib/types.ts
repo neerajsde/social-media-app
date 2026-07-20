@@ -116,6 +116,9 @@ export interface Post {
   author: PostAuthor;
   tags?: string[];
   parentPost?: Post;
+  user?: PostAuthor;
+  isOwnPost?: boolean;
+  isFollowingAuthor?: boolean;
   video?: {
     hlsMasterKey?: string;
     thumbnail?: string;
@@ -180,13 +183,57 @@ export interface FeedResponse {
 }
 
 // ─── Search Types ────────────────────────────────────
-export type SearchType = 'foryou' | 'account' | 'trending' | 'tags';
+export type SearchType = 'foryou' | 'account' | 'trending' | 'tags' | 'posts';
 
 export interface SearchRequest {
   q?: string;
   type?: SearchType;
   page?: number;
   limit?: number;
+}
+
+export interface SearchUserResult {
+  id: string;
+  username: string;
+  first_name?: string;
+  last_name?: string;
+  avatarUrl?: string;
+  isVerified?: boolean;
+  batch?: string;
+}
+
+export interface SearchTagResult {
+  id: string;
+  tag: string;
+  _count: { posts: number };
+}
+
+export interface SearchTrendingResult {
+  query: string;
+  score: number;
+}
+
+export interface RecentSearchResult {
+  id?: string;
+  query: string;
+  type?: string;
+  createdAt?: string;
+  timestamp?: string;
+}
+
+export interface SearchPostResult {
+  id: string;
+  type: PostType;
+  content?: string;
+  images?: string[];
+  mediaUrl?: string;
+  thumbnail?: string;
+  likeCount: number;
+  commentCount: number;
+  viewCount: number;
+  createdAt: string;
+  tags?: string[];
+  author: PostAuthor;
 }
 
 // ─── Notification Types ──────────────────────────────
