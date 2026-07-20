@@ -12,7 +12,7 @@ import { useAppSelector } from '@/lib/hooks';
 import { formatCount, timeAgo } from '@/lib/mock-data';
 import type { Post } from '@/lib/types';
 import { cn } from '@/lib/utils';
-import AuthDialog from './AuthDialog';
+import AuthDialog from '@/components/shared/AuthDialog';
 
 interface PostCardProps {
   post: Post;
@@ -70,10 +70,8 @@ export default function PostCard({ post }: PostCardProps) {
               </div>
             </div>
             <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="w-8 h-8 text-muted-foreground hover:text-foreground">
-                  <MoreHorizontal className="w-4 h-4" />
-                </Button>
+              <DropdownMenuTrigger render={<Button variant="ghost" size="icon" className="w-8 h-8 text-muted-foreground hover:text-foreground" />}>
+                <MoreHorizontal className="w-4 h-4" />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
                 <DropdownMenuItem onClick={handleProtectedAction}>Report post</DropdownMenuItem>
@@ -145,11 +143,9 @@ export default function PostCard({ post }: PostCardProps) {
                 <Heart className={cn('w-4 h-4', liked && 'fill-current')} />
                 <span>{formatCount(likeCount)}</span>
               </Button>
-              <Button variant="ghost" size="sm" className="h-8 px-2 gap-1.5 text-xs text-muted-foreground hover:text-brand-dark dark:hover:text-brand-medium" asChild>
-                <Link href={`/post/${post.id}`}>
-                  <MessageCircle className="w-4 h-4" />
-                  <span>{formatCount(post.commentsCount)}</span>
-                </Link>
+              <Button variant="ghost" size="sm" className="h-8 px-2 gap-1.5 text-xs text-muted-foreground hover:text-brand-dark dark:hover:text-brand-medium" render={<Link href={`/post/${post.id}`} />}>
+                <MessageCircle className="w-4 h-4" />
+                <span>{formatCount(post.commentsCount)}</span>
               </Button>
               <Button variant="ghost" size="sm" className="h-8 px-2 gap-1.5 text-xs text-muted-foreground" onClick={handleProtectedAction}>
                 <Repeat2 className="w-4 h-4" />

@@ -1,0 +1,24 @@
+
+> frontend@0.1.0 build
+> next build
+
+▲ Next.js 16.2.10 (Turbopack)
+- Environments: .env.local
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 19.4s
+  Running TypeScript ...
+Failed to type check.
+
+./components/layout/Sidebar.tsx:31:22
+Type error: Type '{ children: Element; delayDuration: number; }' is not assignable to type 'IntrinsicAttributes & TooltipProviderProps'.
+  Property 'delayDuration' does not exist on type 'IntrinsicAttributes & TooltipProviderProps'.
+
+  [90m29 |[0m
+  [90m30 |[0m   [36mreturn[0m (
+[31m[1m>[0m [90m31 |[0m     <[33mTooltipProvider[0m delayDuration={[35m0[0m}>
+  [90m   |[0m                      [31m[1m^[0m
+  [90m32 |[0m       <aside className=[32m"sticky top-0 h-screen w-[68px] xl:w-[240px] border-r border-border...[0m
+  [90m33 |[0m         {[90m/* Logo */[0m}
+  [90m34 |[0m         <div className=[32m"h-16 flex items-center px-4 xl:px-6"[0m>
+Next.js build worker exited with code: 1 and signal: null

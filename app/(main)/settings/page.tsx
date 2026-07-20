@@ -191,10 +191,8 @@ export default function SettingsPage() {
               </CardHeader>
               <CardContent>
                 <Dialog>
-                  <DialogTrigger asChild>
-                    <Button variant="destructive" className="w-full sm:w-auto">
-                      <Trash2 className="w-4 h-4 mr-2" /> Delete Account
-                    </Button>
+                  <DialogTrigger render={<Button variant="destructive" className="w-full sm:w-auto" />}>
+                    <Trash2 className="w-4 h-4 mr-2" /> Delete Account
                   </DialogTrigger>
                   <DialogContent>
                     <DialogHeader>

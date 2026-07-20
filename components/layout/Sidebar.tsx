@@ -28,7 +28,7 @@ export default function Sidebar() {
   const { isAuthenticated, user } = useAppSelector((state) => state.auth);
 
   return (
-    <TooltipProvider delayDuration={0}>
+    <TooltipProvider delay={0}>
       <aside className="sticky top-0 h-screen w-[68px] xl:w-[240px] border-r border-border flex flex-col bg-background z-30 shrink-0">
         {/* Logo */}
         <div className="h-16 flex items-center px-4 xl:px-6">
@@ -49,7 +49,7 @@ export default function Sidebar() {
             const isActive = pathname === href;
             return (
               <Tooltip key={href}>
-                <TooltipTrigger asChild>
+                <TooltipTrigger render={
                   <Link
                     href={href}
                     className={cn(
@@ -58,10 +58,10 @@ export default function Sidebar() {
                         ? 'bg-brand-dark/10 text-brand-dark dark:bg-brand-medium/20 dark:text-brand-lightest'
                         : 'text-muted-foreground hover:bg-accent hover:text-foreground'
                     )}
-                  >
-                    <Icon className={cn('w-5 h-5 shrink-0', isActive && 'text-brand-dark dark:text-brand-medium')} />
-                    <span className="hidden xl:block">{label}</span>
-                  </Link>
+                  />
+                }>
+                  <Icon className={cn('w-5 h-5 shrink-0', isActive && 'text-brand-dark dark:text-brand-medium')} />
+                  <span className="hidden xl:block">{label}</span>
                 </TooltipTrigger>
                 <TooltipContent side="right" className="xl:hidden">
                   {label}
@@ -74,14 +74,14 @@ export default function Sidebar() {
             <>
               <Separator className="my-2" />
               <Tooltip>
-                <TooltipTrigger asChild>
+                <TooltipTrigger render={
                   <Link
                     href="/create"
                     className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium bg-brand-dark text-brand-lightest hover:bg-brand-dark/90 transition-colors"
-                  >
-                    <PlusSquare className="w-5 h-5 shrink-0" />
-                    <span className="hidden xl:block">Create Post</span>
-                  </Link>
+                  />
+                }>
+                  <PlusSquare className="w-5 h-5 shrink-0" />
+                  <span className="hidden xl:block">Create Post</span>
                 </TooltipTrigger>
                 <TooltipContent side="right" className="xl:hidden">
                   Create Post
@@ -98,7 +98,7 @@ export default function Sidebar() {
             const isActive = pathname === href;
             return (
               <Tooltip key={href}>
-                <TooltipTrigger asChild>
+                <TooltipTrigger render={
                   <Link
                     href={href}
                     className={cn(
@@ -107,10 +107,10 @@ export default function Sidebar() {
                         ? 'bg-brand-dark/10 text-brand-dark dark:bg-brand-medium/20 dark:text-brand-lightest'
                         : 'text-muted-foreground hover:bg-accent hover:text-foreground'
                     )}
-                  >
-                    <Icon className="w-5 h-5 shrink-0" />
-                    <span className="hidden xl:block">{label}</span>
-                  </Link>
+                  />
+                }>
+                  <Icon className="w-5 h-5 shrink-0" />
+                  <span className="hidden xl:block">{label}</span>
                 </TooltipTrigger>
                 <TooltipContent side="right" className="xl:hidden">
                   {label}

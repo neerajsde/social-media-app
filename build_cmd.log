@@ -1,0 +1,24 @@
+
+> frontend@0.1.0 build
+> next build
+
+▲ Next.js 16.2.10 (Turbopack)
+- Environments: .env.local
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 5.3s
+  Running TypeScript ...
+Failed to type check.
+
+./app/(auth)/forgot-password/page.tsx:55:23
+Type error: Type '{ children: Element; asChild: true; className: string; }' is not assignable to type 'IntrinsicAttributes & ButtonProps & VariantProps<(props?: (ConfigVariants<{ variant: { default: string; outline: string; secondary: string; ghost: string; destructive: string; link: string; }; size: { ...; }; }> & ClassProp) | undefined) => string>'.
+  Property 'asChild' does not exist on type 'IntrinsicAttributes & ButtonProps & VariantProps<(props?: (ConfigVariants<{ variant: { default: string; outline: string; secondary: string; ghost: string; destructive: string; link: string; }; size: { ...; }; }> & ClassProp) | undefined) => string>'.
+
+  [90m53 |[0m           {sent ? (
+  [90m54 |[0m             <div className=[32m"space-y-4"[0m>
+[31m[1m>[0m [90m55 |[0m               <[33mButton[0m asChild className=[32m"w-full bg-brand-dark hover:bg-brand-dark/90 text-...[0m
+  [90m   |[0m                       [31m[1m^[0m
+  [90m56 |[0m                 <[33mLink[0m href=[32m"/reset-password"[0m>[33mEnter[0m [33mOTP[0m</[33mLink[0m>
+  [90m57 |[0m               </[33mButton[0m>
+  [90m58 |[0m               <[33mButton[0m variant=[32m"ghost"[0m className=[32m"w-full text-sm"[0m onClick={() => setSent([36mfa...[0m
+Next.js build worker exited with code: 1 and signal: null

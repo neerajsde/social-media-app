@@ -26,17 +26,17 @@ export default function AuthDialog({ open, onOpenChange, title, description }: A
           </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col gap-3 mt-4">
-          <Button asChild className="bg-brand-dark hover:bg-brand-dark/90 text-brand-lightest">
-            <Link href="/login" onClick={() => onOpenChange(false)}>
-              <LogIn className="w-4 h-4 mr-2" />
-              Log In
-            </Link>
+          <Button className="bg-brand-dark hover:bg-brand-dark/90 text-brand-lightest" render={
+            <Link href="/login" onClick={() => onOpenChange(false)} />
+          }>
+            <LogIn className="w-4 h-4 mr-2" />
+            Log In
           </Button>
-          <Button variant="outline" asChild>
-            <Link href="/signup" onClick={() => onOpenChange(false)}>
-              <UserPlus className="w-4 h-4 mr-2" />
-              Create Account
-            </Link>
+          <Button variant="outline" render={
+            <Link href="/signup" onClick={() => onOpenChange(false)} />
+          }>
+            <UserPlus className="w-4 h-4 mr-2" />
+            Create Account
           </Button>
         </div>
       </DialogContent>

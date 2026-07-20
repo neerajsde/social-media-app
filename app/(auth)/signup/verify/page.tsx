@@ -40,7 +40,7 @@ export default function SignupVerifyPage() {
         dispatch(setCredentials({
           accessToken: result.accessToken,
           refreshToken: result.refreshToken,
-          user: result.user || undefined
+          user: (result as any).user || undefined
         }));
         toast.success('Registration successful! Welcome to NexusPlay.');
         router.push('/');

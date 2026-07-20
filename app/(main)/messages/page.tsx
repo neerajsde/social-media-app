@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Send, Search, MessageSquare, AlertCircle, Phone, Video, Info } from 'lucide-react';
+import { Send, Search, MessageSquare, AlertCircle, Phone, Video, Info, ArrowLeft } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';

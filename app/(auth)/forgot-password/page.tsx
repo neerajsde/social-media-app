@@ -52,8 +52,8 @@ export default function ForgotPasswordPage() {
         <CardContent>
           {sent ? (
             <div className="space-y-4">
-              <Button asChild className="w-full bg-brand-dark hover:bg-brand-dark/90 text-brand-lightest">
-                <Link href="/reset-password">Enter OTP</Link>
+              <Button className="w-full bg-brand-dark hover:bg-brand-dark/90 text-brand-lightest" render={<Link href="/reset-password" />}>
+                Enter OTP
               </Button>
               <Button variant="ghost" className="w-full text-sm" onClick={() => setSent(false)}>
                 Didn&apos;t receive it? Try again

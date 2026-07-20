@@ -55,8 +55,8 @@ export default function ResetPasswordPage() {
             <CardDescription>Your password has been successfully reset. You can now log in with your new password.</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button asChild className="w-full bg-brand-dark hover:bg-brand-dark/90 text-brand-lightest">
-              <Link href="/login">Go to Login</Link>
+            <Button className="w-full bg-brand-dark hover:bg-brand-dark/90 text-brand-lightest" render={<Link href="/login" />}>
+              Go to Login
             </Button>
           </CardContent>
         </Card>
