@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import type { AuthState, User } from '../types';
+import type { AuthState, User } from '../../types';
 
 const initialState: AuthState = {
   user: null,
@@ -21,9 +21,20 @@ const authSlice = createSlice({
       state.isAuthenticated = true;
       state.otpRequired = false;
       state.otpToken = null;
+      
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('accessToken', action.payload.accessToken);
+        localStorage.setItem('refreshToken', action.payload.refreshToken);
+        if (action.payload.user) {
+          localStorage.setItem('user', JSON.stringify(action.payload.user));
+        }
+      }
     },
     setUser: (state, action: PayloadAction<User>) => {
       state.user = action.payload;
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('user', JSON.stringify(action.payload));
+      }
     },
     setOtpRequired: (state, action: PayloadAction<string>) => {
       state.otpToken = action.payload;
@@ -36,6 +47,12 @@ const authSlice = createSlice({
       state.isAuthenticated = false;
       state.otpRequired = false;
       state.otpToken = null;
+      
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        localStorage.removeItem('user');
+      }
     },
   },
 });
