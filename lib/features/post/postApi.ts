@@ -1,10 +1,11 @@
 import { baseApi } from '../../services/api';
-import type { Post, Comment, CreatePostRequest, FeedResponse } from '../../types';
+import type { Post, Comment, CreatePostRequest, FeedResponse, FeedType } from '../../types';
 
 export const postApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getFeed: builder.query<FeedResponse, { page?: number; limit?: number }>({
-      query: ({ page = 1, limit = 10 }) => `/post/feed?page=${page}&limit=${limit}`,
+    getFeed: builder.query<FeedResponse, { page?: number; limit?: number; type?: FeedType }>({
+      query: ({ page = 1, limit = 10, type = 'foryou' }) =>
+        `/post/feed?page=${page}&limit=${limit}&type=${type}`,
       providesTags: ['Feed'],
     }),
     getUserPosts: builder.query<{ success: boolean; posts: Post[]; meta: any }, { userId: string; page?: number; limit?: number }>({
@@ -92,13 +93,19 @@ export const postApi = baseApi.injectEndpoints({
         method: 'POST',
       }),
     }),
-    repost: builder.mutation<{ success: boolean }, { postId: string; content?: string; visibility: string }>({
+    repost: builder.mutation<{ success: boolean; message: string }, { postId: string; content?: string; visibility: string }>({
       query: (body) => ({
         url: '/post/repost',
         method: 'POST',
         body,
       }),
       invalidatesTags: ['Feed'],
+    }),
+    sharePostExternally: builder.mutation<{ success: boolean; message: string }, string>({
+      query: (postId) => ({
+        url: `/post/share-post-externally/${postId}`,
+        method: 'POST',
+      }),
     }),
     generatePostPresignedUrl: builder.mutation<{ success: boolean; data: any }, { postType: string; mimeTypes: string | string[] }>({
       query: (body) => ({
@@ -126,5 +133,6 @@ export const {
   useDeleteCommentMutation,
   useLikeCommentMutation,
   useRepostMutation,
+  useSharePostExternallyMutation,
   useGeneratePostPresignedUrlMutation,
 } = postApi;

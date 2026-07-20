@@ -109,7 +109,7 @@ export default function SettingsPage() {
   const [lastName, setLastName] = useState('');
   const [username, setUsername] = useState('');
   const [bio, setBio] = useState('');
-  const [gender, setGender] = useState('');
+  const [gender, setGender] = useState<string>('');
   const [birthdate, setBirthdate] = useState('');
   const [location, setLocation] = useState('');
   const [websiteUrl, setWebsiteUrl] = useState('');
@@ -448,7 +448,7 @@ export default function SettingsPage() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-1.5">
                       <Label htmlFor="s-gender" className="text-xs font-semibold text-muted-foreground">Gender</Label>
-                      <Select value={gender} onValueChange={(val) => setGender(val)}>
+                      <Select value={gender} onValueChange={(val) => setGender(val ?? '')}>
                         <SelectTrigger className="bg-muted/30 border-border focus:border-brand-medium h-9 text-sm">
                           <SelectValue placeholder="Select gender" />
                         </SelectTrigger>

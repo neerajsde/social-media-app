@@ -1,7 +1,6 @@
 'use client';
 
 import { use, useState, useEffect, useRef } from 'react';
-import Link from 'next/navigation';
 import LinkNext from 'next/link';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/lib/store';
@@ -54,6 +53,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { toast } from 'sonner';
+import { getMediaUrl } from '@/lib/media-url';
 
 export default function ProfilePage({ params }: { params: Promise<{ username: string }> }) {
   const { username } = use(params);
@@ -516,7 +516,7 @@ export default function ProfilePage({ params }: { params: Promise<{ username: st
                     <LinkNext key={post.id} href={`/post/${post.id}`} className="aspect-square overflow-hidden rounded-lg bg-muted relative group">
                       {mediaUrl ? (
                         <img
-                          src={mediaUrl}
+                          src={getMediaUrl(mediaUrl)}
                           alt=""
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
                         />
