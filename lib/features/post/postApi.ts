@@ -20,6 +20,10 @@ export const postApi = baseApi.injectEndpoints({
       query: ({ postId, page = 1, limit = 10 }) => `/post/${postId}/comments?page=${page}&limit=${limit}`,
       providesTags: (_result, _err, { postId }) => [{ type: 'Comments', id: postId }],
     }),
+    getCommentReplies: builder.query<{ success: boolean; data: Comment[]; total: number }, { commentId: string; page?: number; limit?: number }>({
+      query: ({ commentId, page = 1, limit = 10 }) => `/post/comment/${commentId}/replies?page=${page}&limit=${limit}`,
+      providesTags: (_result, _err, { commentId }) => [{ type: 'Replies', id: commentId }],
+    }),
     createPost: builder.mutation<{ success: boolean; data: Post }, CreatePostRequest>({
       query: (body) => ({
         url: '/post/',
@@ -122,6 +126,7 @@ export const {
   useGetUserPostsQuery,
   useGetPostQuery,
   useGetPostCommentsQuery,
+  useGetCommentRepliesQuery,
   useCreatePostMutation,
   useUpdatePostMutation,
   useDeletePostMutation,
