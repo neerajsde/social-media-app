@@ -41,9 +41,10 @@ import {
 
 interface PostCardProps {
   post: Post;
+  showMedia?: boolean;
 }
 
-export default function PostCard({ post }: PostCardProps) {
+export default function PostCard({ post, showMedia = true }: PostCardProps) {
   const author = post.author ||
     post.user || {
       id: 'unknown',
@@ -134,14 +135,17 @@ export default function PostCard({ post }: PostCardProps) {
     }
   };
 
-  const handleShare = async () => {
+ const handleShare = async () => {
+    if (!isAuthenticated) {
+      setShowAuthDialog(true);
+      return;
+    }
+
     const url = `${window.location.origin}/post/${post.id}`;
 
     try {
       await navigator.clipboard.writeText(url);
-      if (isAuthenticated) {
-        await shareExternally(post.id).unwrap();
-      }
+      await shareExternally(post.id).unwrap();
       toast.success('Link copied to clipboard');
     } catch {
       toast.error('Could not copy link');
@@ -268,7 +272,7 @@ export default function PostCard({ post }: PostCardProps) {
           )}
 
           {/* Images */}
-          {post.images && post.images.length > 0 && (
+          {showMedia && post.images && post.images.length > 0 && (
             <Link href={`/post/${post.id}`}>
               <div
                 className={cn(
@@ -305,7 +309,7 @@ export default function PostCard({ post }: PostCardProps) {
           )}
 
           {/* Video / Reel thumbnail */}
-          {showVideoMedia && (
+          {showMedia && showVideoMedia && (
             <Link href={`/post/${post.id}`}>
               <div className="relative rounded-xl overflow-hidden mb-3 aspect-video bg-muted">
                 <img

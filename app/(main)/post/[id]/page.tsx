@@ -2,194 +2,113 @@
 
 import { use, useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, MessageSquare, Send, Heart, Repeat2, Bookmark, Share2 } from 'lucide-react';
+import { ArrowLeft, MessageSquare, Send } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import PostCard from '@/components/shared/PostCard';
-import { mockPosts, formatCount, timeAgo } from '@/lib/mock-data';
-import { useAppSelector } from '@/lib/hooks';
+import PostMediaViewer from '@/components/shared/PostMediaViewer';
 import AuthDialog from '@/components/shared/AuthDialog';
-import { toast } from 'sonner';
+import { useAppSelector } from '@/lib/hooks';
+import { useCommentOnPostMutation, useGetPostCommentsQuery, useGetPostQuery } from '@/lib/features/post/postApi';
+import { normalizeFeedPost } from '@/lib/post-utils';
+import { formatCount, timeAgo } from '@/lib/mock-data';
+import type { PostAuthor } from '@/lib/types';
+
+type ApiComment = {
+  id: string;
+  content: string;
+  likesCount?: number;
+  likeCount?: number;
+  createdAt: string;
+  user?: PostAuthor;
+  author?: PostAuthor;
+};
 
 export default function PostDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const { isAuthenticated } = useAppSelector((state) => state.auth);
-  const [showAuthDialog, setShowAuthDialog] = useState(false);
+  const { isAuthenticated, user } = useAppSelector((state) => state.auth);
   const [commentContent, setCommentContent] = useState('');
+  const [showAuthDialog, setShowAuthDialog] = useState(false);
+  const { data, isLoading, isError } = useGetPostQuery(id);
+  const [commentOnPost, { isLoading: isCommenting }] = useCommentOnPostMutation();
+  const { data: commentsResponse } = useGetPostCommentsQuery({ postId: id, limit: 50 });
+  const post = data?.data ? normalizeFeedPost(data.data as unknown as Record<string, unknown>) : undefined;
+  const commentsData = commentsResponse?.data as unknown as { comments?: ApiComment[] } | undefined;
+  const comments = commentsData?.comments ?? [];
 
-  const post = mockPosts.find((p) => p.id === id) || mockPosts[0];
-
-  const [comments, setComments] = useState([
-    {
-      id: 'c1',
-      content: 'Absolutely stunning capture! What camera body and lens did you use for this?',
-      likesCount: 24,
-      createdAt: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
-      author: {
-        id: 'user_alex',
-        username: 'alex_wanderer',
-        first_name: 'Alex',
-        last_name: 'Morgan',
-        avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face',
-      },
-    },
-    {
-      id: 'c2',
-      content: 'This is gorgeous! The lighting is perfect.',
-      likesCount: 12,
-      createdAt: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
-      author: {
-        id: 'user_emma',
-        username: 'emma_designs',
-        first_name: 'Emma',
-        last_name: 'Wilson',
-        avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop&crop=face',
-      },
-    },
-  ]);
-
-  const handleCommentSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleCommentSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
     if (!isAuthenticated) {
       setShowAuthDialog(true);
       return;
     }
-    if (!commentContent.trim()) return;
+    if (!commentContent.trim() || isCommenting) return;
 
-    const newComment = {
-      id: Math.random().toString(),
-      content: commentContent,
-      likesCount: 0,
-      createdAt: new Date().toISOString(),
-      author: {
-        id: 'current_user',
-        username: 'visitor_user',
-        first_name: 'Guest',
-        last_name: 'User',
-        avatarUrl: '',
-      },
-    };
-
-    setComments([newComment, ...comments]);
-    setCommentContent('');
-    toast.success('Comment posted successfully');
+    try {
+      await commentOnPost({ postId: id, content: commentContent.trim() }).unwrap();
+      setCommentContent('');
+    } catch {
+      // Keep the comment text available so the user can retry.
+    }
   };
 
   return (
-    <div className="max-w-2xl mx-auto">
-      {/* Header */}
-      <div className="sticky top-0 z-20 bg-background/80 backdrop-blur-xl border-b border-border px-4 py-3 flex items-center gap-3">
-        <Link href="/">
-          <Button variant="ghost" size="icon" className="w-8 h-8">
-            <ArrowLeft className="w-4 h-4" />
+    <div className="mx-auto max-w-2xl">
+      <div className="sticky top-0 z-20 flex items-center gap-3 border-b border-border bg-background/80 px-4 py-3 backdrop-blur-xl">
+        <Link href="/" aria-label="Back to feed">
+          <Button variant="ghost" size="icon" className="h-8 w-8">
+            <ArrowLeft className="h-4 w-4" />
           </Button>
         </Link>
-        <h1 className="text-sm font-bold">Post Details</h1>
+        <h1 className="text-sm font-bold">Post details</h1>
       </div>
 
-      <div className="p-4 space-y-4">
-        {/* Main Post Card */}
-        <PostCard post={post} />
+      {isLoading && <p className="p-8 text-center text-sm text-muted-foreground">Loading post…</p>}
+      {isError && <p className="p-8 text-center text-sm text-muted-foreground">This post is unavailable or you do not have access to it.</p>}
 
-        <Separator />
+      {post && (
+        <div className="space-y-4 p-4">
+          <PostCard post={post} showMedia={false} />
+          <PostMediaViewer post={post} />
+          <Separator />
 
-        {/* Comment Input */}
-        <Card className="border-border/50">
-          <CardContent className="p-4">
-            <form onSubmit={handleCommentSubmit} className="space-y-3">
-              <div className="flex gap-3">
-                <Avatar className="w-8 h-8">
-                  <AvatarFallback className="bg-brand-medium/20 text-brand-dark text-xs">U</AvatarFallback>
-                </Avatar>
-                <div className="flex-1">
-                  <Textarea
-                    placeholder="Write a comment..."
-                    value={commentContent}
-                    onChange={(e) => setCommentContent(e.target.value)}
-                    className="min-h-[80px] resize-none border-none focus-visible:ring-0 p-0 text-sm placeholder:text-muted-foreground bg-transparent"
-                  />
-                </div>
-              </div>
-              <div className="flex justify-end pt-2 border-t border-border/50">
-                <Button type="submit" size="sm" className="bg-brand-dark hover:bg-brand-dark/90 text-brand-lightest rounded-full px-4 text-xs font-semibold">
-                  <Send className="w-3.5 h-3.5 mr-1.5" />
-                  Comment
-                </Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
-
-        {/* Comments Section */}
-        <div className="space-y-3">
-          <h3 className="text-sm font-semibold text-muted-foreground flex items-center gap-1.5 px-1">
-            <MessageSquare className="w-4 h-4" />
-            Comments ({comments.length})
-          </h3>
-
-          {comments.map((comment) => (
-            <Card key={comment.id} className="border-border/40 bg-card/30">
-              <CardContent className="p-4">
-                <div className="flex items-start gap-3">
-                  <Link href={`/profile/${comment.author.username}`}>
-                    <Avatar className="w-8 h-8">
-                      <AvatarImage src={comment.author.avatarUrl} alt={comment.author.username} />
-                      <AvatarFallback className="bg-brand-medium/10 text-brand-dark text-xs">{comment.author.first_name?.[0]}</AvatarFallback>
-                    </Avatar>
-                  </Link>
-                  <div className="flex-1 space-y-1">
-                    <div className="flex items-center gap-1.5">
-                      <Link href={`/profile/${comment.author.username}`} className="text-xs font-semibold hover:underline">
-                        {comment.author.first_name} {comment.author.last_name}
+          <section className="space-y-3">
+            <h2 className="flex items-center gap-1.5 px-1 text-sm font-semibold text-muted-foreground">
+              <MessageSquare className="h-4 w-4" />
+              Comments ({formatCount(post.commentsCount)})
+            </h2>
+            {comments.map((comment) => {
+              const author = comment.author ?? comment.user;
+              if (!author) return null;
+              return (
+                <Card key={comment.id} className="border-border/40 bg-card/30">
+                  <CardContent className="p-4">
+                    <div className="flex items-start gap-3">
+                      <Link href={`/profile/${author.username}`}>
+                        <Avatar className="h-8 w-8">
+                          <AvatarImage src={author.avatarUrl} alt={author.username} />
+                          <AvatarFallback>{author.first_name?.[0] ?? author.username[0]}</AvatarFallback>
+                        </Avatar>
                       </Link>
-                      <span className="text-[10px] text-muted-foreground">·</span>
-                      <span className="text-[10px] text-muted-foreground">{timeAgo(comment.createdAt)}</span>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs font-semibold">{author.first_name ?? author.username} {author.last_name ?? ''}</p>
+                        <p className="text-sm text-foreground/90">{comment.content}</p>
+                        <p className="mt-1 text-[11px] text-muted-foreground">
+                          {timeAgo(comment.createdAt)} · {formatCount(comment.likesCount ?? comment.likeCount ?? 0)} likes
+                        </p>
+                      </div>
                     </div>
-                    <p className="text-sm text-foreground/90">{comment.content}</p>
-
-                    <div className="flex items-center gap-4 pt-1">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          if (!isAuthenticated) {
-                            setShowAuthDialog(true);
-                          } else {
-                            toast.success('Liked comment!');
-                          }
-                        }}
-                        className="h-6 px-1.5 gap-1 text-[11px] text-muted-foreground hover:text-red-500"
-                      >
-                        <Heart className="w-3 h-3" />
-                        <span>{formatCount(comment.likesCount)}</span>
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          if (!isAuthenticated) {
-                            setShowAuthDialog(true);
-                          } else {
-                            toast.info('Reply feature coming soon!');
-                          }
-                        }}
-                        className="h-6 px-1.5 text-[11px] text-muted-foreground"
-                      >
-                        Reply
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                  </CardContent>
+                </Card>
+              );
+            })}
+            {comments.length === 0 && <p className="px-1 text-sm text-muted-foreground">No comments yet.</p>}
+          </section>
         </div>
-      </div>
-
-      <AuthDialog open={showAuthDialog} onOpenChange={setShowAuthDialog} />
+      )}
     </div>
   );
 }
