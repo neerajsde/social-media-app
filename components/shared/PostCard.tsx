@@ -19,8 +19,23 @@ interface PostCardProps {
 }
 
 export default function PostCard({ post }: PostCardProps) {
+  // Normalize fields between frontend schema and backend JSON response polymorphism
+  const author = post.author || (post as any).user || {
+    id: 'unknown',
+    username: 'anonymous',
+    avatarUrl: undefined,
+    first_name: 'NexusPlay',
+    last_name: 'User',
+    isVerified: false,
+  };
+
+  const initialLikeCount = post.likesCount ?? (post as any).likeCount ?? 0;
+  const commentsCount = post.commentsCount ?? (post as any).commentCount ?? 0;
+  const sharesCount = post.sharesCount ?? (post as any).shareCount ?? 0;
+  const viewsCount = post.viewsCount ?? (post as any).viewCount ?? 0;
+
   const [liked, setLiked] = useState(post.isLiked || false);
-  const [likeCount, setLikeCount] = useState(post.likesCount);
+  const [likeCount, setLikeCount] = useState(initialLikeCount);
   const [bookmarked, setBookmarked] = useState(post.isBookmarked || false);
   const [showAuthDialog, setShowAuthDialog] = useState(false);
   const { isAuthenticated } = useAppSelector((state) => state.auth);
@@ -40,31 +55,37 @@ export default function PostCard({ post }: PostCardProps) {
     if (!isAuthenticated) { setShowAuthDialog(true); return; }
   };
 
+  const authorName = author.first_name 
+    ? `${author.first_name} ${author.last_name || ''}`.trim()
+    : author.username;
+
   return (
     <>
       <Card className="border-border/50 shadow-sm hover:shadow-md transition-shadow duration-200">
         <CardContent className="p-4 sm:p-5">
           {/* Author row */}
           <div className="flex items-start gap-3 mb-3">
-            <Link href={`/profile/${post.author.username}`}>
+            <Link href={`/profile/${author.username}`}>
               <Avatar className="w-10 h-10 ring-1 ring-border hover:ring-brand-medium transition-all">
-                <AvatarImage src={post.author.avatarUrl} alt={post.author.username} />
-                <AvatarFallback className="bg-brand-medium/20 text-brand-dark text-sm">{post.author.first_name?.[0] || post.author.username[0]}</AvatarFallback>
+                <AvatarImage src={author.avatarUrl} alt={author.username} />
+                <AvatarFallback className="bg-brand-medium/20 text-brand-dark text-sm">
+                  {author.first_name?.[0] || author.username?.[0] || '?'}
+                </AvatarFallback>
               </Avatar>
             </Link>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-1.5">
-                <Link href={`/profile/${post.author.username}`} className="text-sm font-semibold hover:underline truncate">
-                  {post.author.first_name} {post.author.last_name}
+                <Link href={`/profile/${author.username}`} className="text-sm font-semibold hover:underline truncate">
+                  {authorName}
                 </Link>
-                {post.author.isVerified && (
+                {author.isVerified && (
                   <svg className="w-3.5 h-3.5 text-brand-dark dark:text-brand-medium shrink-0" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
                   </svg>
                 )}
               </div>
               <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                <Link href={`/profile/${post.author.username}`} className="hover:underline">@{post.author.username}</Link>
+                <Link href={`/profile/${author.username}`} className="hover:underline">@{author.username}</Link>
                 <span>·</span>
                 <span>{timeAgo(post.createdAt)}</span>
               </div>
@@ -145,11 +166,11 @@ export default function PostCard({ post }: PostCardProps) {
               </Button>
               <Button variant="ghost" size="sm" className="h-8 px-2 gap-1.5 text-xs text-muted-foreground hover:text-brand-dark dark:hover:text-brand-medium" nativeButton={false} render={<Link href={`/post/${post.id}`} />}>
                 <MessageCircle className="w-4 h-4" />
-                <span>{formatCount(post.commentsCount)}</span>
+                <span>{formatCount(commentsCount)}</span>
               </Button>
               <Button variant="ghost" size="sm" className="h-8 px-2 gap-1.5 text-xs text-muted-foreground" onClick={handleProtectedAction}>
                 <Repeat2 className="w-4 h-4" />
-                <span>{formatCount(post.sharesCount)}</span>
+                <span>{formatCount(sharesCount)}</span>
               </Button>
               <Button variant="ghost" size="sm" className="h-8 px-2 gap-1.5 text-xs text-muted-foreground" onClick={handleProtectedAction}>
                 <Share2 className="w-4 h-4" />
@@ -158,7 +179,7 @@ export default function PostCard({ post }: PostCardProps) {
             <div className="flex items-center gap-1">
               <span className="text-xs text-muted-foreground flex items-center gap-1">
                 <Eye className="w-3.5 h-3.5" />
-                {formatCount(post.viewsCount)}
+                {formatCount(viewsCount)}
               </span>
               <Button
                 variant="ghost"
