@@ -93,6 +93,26 @@ export const authApi = baseApi.injectEndpoints({
         body,
       }),
     }),
+    enable2FA: builder.mutation<{ success: boolean; message: string; token: string }, void>({
+      query: () => ({
+        url: '/auth/enable/2fa/otp',
+        method: 'POST',
+      }),
+    }),
+    verify2FA: builder.mutation<{ success: boolean; message: string }, { otp: string; token: string }>({
+      query: ({ otp, token }) => ({
+        url: `/auth/enable/2fa/verify/${token}`,
+        method: 'POST',
+        body: { otp },
+      }),
+    }),
+    disable2FA: builder.mutation<{ success: boolean; message: string }, { password: string }>({
+      query: (body) => ({
+        url: '/auth/2fa/disable',
+        method: 'POST',
+        body,
+      }),
+    }),
   }),
 });
 
@@ -111,4 +131,7 @@ export const {
   useLogoutAllDevicesMutation,
   useGetSessionsQuery,
   useDeleteAccountMutation,
+  useEnable2FAMutation,
+  useVerify2FAMutation,
+  useDisable2FAMutation,
 } = authApi;
