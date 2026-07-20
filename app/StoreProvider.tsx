@@ -24,6 +24,8 @@ function AuthInit({ children }: { children: React.ReactNode }) {
           refreshToken: storedRefreshToken,
           user: storedUser,
         }));
+        // setCredentials already calls setCookie internally, so the cookie
+        // will be (re)set here on every page refresh too.
       }
     } catch (e) {
       console.warn('Failed to restore auth session:', e);

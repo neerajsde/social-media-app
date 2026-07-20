@@ -23,6 +23,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import PostCard from '@/components/shared/PostCard';
+import AuthDialog from '@/components/shared/AuthDialog';
 import { formatCount } from '@/lib/mock-data';
 import {
   useGetUserProfileByUsernameQuery,
@@ -72,7 +73,7 @@ export default function ProfilePage({ params }: { params: Promise<{ username: st
   const userPosts = postsData?.posts ?? [];
 
   // Redux auth
-  const currentUser = useSelector((state: RootState) => state.auth.user);
+  const { user: currentUser, isAuthenticated } = useSelector((state: RootState) => state.auth);
   const isOwner = currentUser?.username === user?.username;
 
   // Mutations
@@ -87,6 +88,7 @@ export default function ProfilePage({ params }: { params: Promise<{ username: st
   // Follow states
   const [isFollowingState, setIsFollowingState] = useState(false);
   const [followersCountState, setFollowersCountState] = useState(0);
+  const [showAuthDialog, setShowAuthDialog] = useState(false);
 
   // Dialog Form states
   const [editOpen, setEditOpen] = useState(false);
@@ -142,6 +144,10 @@ export default function ProfilePage({ params }: { params: Promise<{ username: st
   }
 
   const handleFollowToggle = async () => {
+    if (!isAuthenticated) {
+      setShowAuthDialog(true);
+      return;
+    }
     try {
       if (isFollowingState) {
         setIsFollowingState(false);
@@ -660,6 +666,7 @@ export default function ProfilePage({ params }: { params: Promise<{ username: st
           </form>
         </DialogContent>
       </Dialog>
+      <AuthDialog open={showAuthDialog} onOpenChange={setShowAuthDialog} />
     </div>
   );
 }

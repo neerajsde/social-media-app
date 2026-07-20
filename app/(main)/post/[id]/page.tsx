@@ -151,11 +151,33 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
                     <p className="text-sm text-foreground/90">{comment.content}</p>
 
                     <div className="flex items-center gap-4 pt-1">
-                      <Button variant="ghost" size="sm" className="h-6 px-1.5 gap-1 text-[11px] text-muted-foreground hover:text-red-500">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          if (!isAuthenticated) {
+                            setShowAuthDialog(true);
+                          } else {
+                            toast.success('Liked comment!');
+                          }
+                        }}
+                        className="h-6 px-1.5 gap-1 text-[11px] text-muted-foreground hover:text-red-500"
+                      >
                         <Heart className="w-3 h-3" />
                         <span>{formatCount(comment.likesCount)}</span>
                       </Button>
-                      <Button variant="ghost" size="sm" className="h-6 px-1.5 text-[11px] text-muted-foreground">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          if (!isAuthenticated) {
+                            setShowAuthDialog(true);
+                          } else {
+                            toast.info('Reply feature coming soon!');
+                          }
+                        }}
+                        className="h-6 px-1.5 text-[11px] text-muted-foreground"
+                      >
                         Reply
                       </Button>
                     </div>

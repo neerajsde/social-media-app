@@ -10,6 +10,18 @@ const initialState: AuthState = {
   otpRequired: false,
 };
 
+// ─── Cookie helpers ──────────────────────────────────────────────────────────
+function setCookie(name: string, value: string, days = 7) {
+  if (typeof document === 'undefined') return;
+  const maxAge = days * 24 * 60 * 60;
+  document.cookie = `${name}=${encodeURIComponent(value)}; path=/; max-age=${maxAge}; SameSite=Strict`;
+}
+
+function deleteCookie(name: string) {
+  if (typeof document === 'undefined') return;
+  document.cookie = `${name}=; path=/; max-age=0; SameSite=Strict`;
+}
+
 const authSlice = createSlice({
   name: 'auth',
   initialState,
@@ -28,6 +40,8 @@ const authSlice = createSlice({
         if (action.payload.user) {
           localStorage.setItem('user', JSON.stringify(action.payload.user));
         }
+        // Sync to cookie so Next.js middleware can read it server-side
+        setCookie('accessToken', action.payload.accessToken);
       }
     },
     setUser: (state, action: PayloadAction<User>) => {
@@ -52,6 +66,8 @@ const authSlice = createSlice({
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
         localStorage.removeItem('user');
+        // Remove cookie so middleware stops treating user as logged in
+        deleteCookie('accessToken');
       }
     },
   },
@@ -59,3 +75,4 @@ const authSlice = createSlice({
 
 export const { setCredentials, setUser, setOtpRequired, logout } = authSlice.actions;
 export default authSlice.reducer;
+
