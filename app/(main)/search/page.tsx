@@ -11,7 +11,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import PostCard from '@/components/shared/PostCard';
 import { formatCount } from '@/lib/mock-data';
-import { useDebouncedValue } from '@/lib/hooks';
+import { useAppSelector, useDebouncedValue } from '@/lib/hooks';
 import {
   useSearchQuery,
   useGetRecentSearchesQuery,
@@ -56,6 +56,7 @@ export default function SearchPage() {
 
 function SearchPageContent() {
   const searchParams = useSearchParams();
+  const { isAuthenticated } = useAppSelector((state) => state.auth);
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState<SearchFilter>('all');
 
@@ -77,7 +78,7 @@ function SearchPageContent() {
   );
 
   const { data: recentData, isLoading: recentLoading } = useGetRecentSearchesQuery(10, {
-    skip: hasQuery,
+    skip: hasQuery || !isAuthenticated,
   });
 
   const {
