@@ -2,13 +2,16 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Search, Bell, MessageCircle, Bookmark, User, Settings, PlusSquare, TrendingUp, LogOut, Compass } from 'lucide-react';
+import { Home, Search, Bell, MessageCircle, Bookmark, User, Settings, PlusSquare, TrendingUp, LogOut, Compass, MoreHorizontal } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { useAppSelector } from '@/lib/hooks';
+import { useAppSelector, useAppDispatch } from '@/lib/hooks';
 import { cn } from '@/lib/utils';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { logout } from '@/lib/features/auth/authSlice';
+import { toast } from 'sonner';
 
 const navItems = [
   { href: '/', icon: Home, label: 'Home' },
@@ -25,6 +28,7 @@ const secondaryItems = [
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const dispatch = useAppDispatch();
   const { isAuthenticated, user } = useAppSelector((state) => state.auth);
 
   return (
@@ -122,16 +126,36 @@ export default function Sidebar() {
           <Separator className="my-2" />
 
           {isAuthenticated && user ? (
-            <Link href={`/profile/${user.username}`} className="flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-accent transition-colors">
-              <Avatar className="w-8 h-8">
-                <AvatarImage src={user.avatarUrl} alt={user.username} />
-                <AvatarFallback className="bg-brand-medium text-brand-lightest text-xs">{user.first_name?.[0] || user.username[0]}</AvatarFallback>
-              </Avatar>
-              <div className="hidden xl:block min-w-0">
-                <p className="text-sm font-medium text-foreground truncate">{user.first_name} {user.last_name}</p>
-                <p className="text-xs text-muted-foreground truncate">@{user.username}</p>
-              </div>
-            </Link>
+            <DropdownMenu>
+              <DropdownMenuTrigger render={
+                <button className="flex items-center gap-3 w-full rounded-lg px-2 py-1.5 hover:bg-accent transition-colors text-left outline-none cursor-pointer">
+                  <Avatar className="w-8 h-8 shrink-0">
+                    <AvatarImage src={user.avatarUrl} alt={user.username} />
+                    <AvatarFallback className="bg-brand-medium text-brand-lightest text-xs">{user.first_name?.[0] || user.username[0]}</AvatarFallback>
+                  </Avatar>
+                  <div className="hidden xl:block min-w-0 flex-1">
+                    <p className="text-sm font-medium text-foreground truncate leading-tight">{user.first_name} {user.last_name}</p>
+                    <p className="text-xs text-muted-foreground truncate">@{user.username}</p>
+                  </div>
+                  <MoreHorizontal className="w-4 h-4 text-muted-foreground hidden xl:block shrink-0 ml-auto" />
+                </button>
+              } />
+              <DropdownMenuContent align="start" className="w-[200px] mb-2 z-50">
+                <DropdownMenuItem render={<Link href={`/profile/${user.username}`} />}>
+                  <User className="w-4 h-4 mr-2" />
+                  View Profile
+                </DropdownMenuItem>
+                <DropdownMenuItem render={<Link href="/settings" />}>
+                  <Settings className="w-4 h-4 mr-2" />
+                  Settings
+                </DropdownMenuItem>
+                <Separator className="my-1" />
+                <DropdownMenuItem onClick={() => { dispatch(logout()); toast.success('Logged out successfully'); }} className="text-destructive focus:bg-destructive/10 focus:text-destructive">
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Log Out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           ) : (
             <div className="flex flex-col gap-2">
               <Link href="/login">

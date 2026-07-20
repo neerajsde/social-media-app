@@ -143,7 +143,7 @@ export default function PostCard({ post }: PostCardProps) {
                 <Heart className={cn('w-4 h-4', liked && 'fill-current')} />
                 <span>{formatCount(likeCount)}</span>
               </Button>
-              <Button variant="ghost" size="sm" className="h-8 px-2 gap-1.5 text-xs text-muted-foreground hover:text-brand-dark dark:hover:text-brand-medium" render={<Link href={`/post/${post.id}`} />}>
+              <Button variant="ghost" size="sm" className="h-8 px-2 gap-1.5 text-xs text-muted-foreground hover:text-brand-dark dark:hover:text-brand-medium" nativeButton={false} render={<Link href={`/post/${post.id}`} />}>
                 <MessageCircle className="w-4 h-4" />
                 <span>{formatCount(post.commentsCount)}</span>
               </Button>
