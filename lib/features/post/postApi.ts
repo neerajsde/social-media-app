@@ -20,6 +20,10 @@ export const postApi = baseApi.injectEndpoints({
       query: ({ postId, page = 1, limit = 10 }) => `/post/${postId}/comments?page=${page}&limit=${limit}`,
       providesTags: (_result, _err, { postId }) => [{ type: 'Comments', id: postId }],
     }),
+    getCommentReplies: builder.query<{ success: boolean; data: Comment[]; total: number }, { commentId: string; page?: number; limit?: number }>({
+      query: ({ commentId, page = 1, limit = 10 }) => `/post/comment/${commentId}/replies?page=${page}&limit=${limit}`,
+      providesTags: (_result, _err, { commentId }) => [{ type: 'Replies', id: commentId }],
+    }),
     createPost: builder.mutation<{ success: boolean; data: Post }, CreatePostRequest>({
       query: (body) => ({
         url: '/post/',
@@ -80,6 +84,14 @@ export const postApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ['Comments'],
     }),
+    editComment: builder.mutation<{ success: boolean }, { commentId: string; content: string }>({
+      query: (body) => ({
+        url: '/post/comment',
+        method: 'PUT',
+        body,
+      }),
+      invalidatesTags: ['Comments'],
+    }),
     deleteComment: builder.mutation<{ success: boolean }, { postId: string; commentId: string }>({
       query: ({ postId, commentId }) => ({
         url: `/post/comment/${postId}/${commentId}`,
@@ -92,6 +104,7 @@ export const postApi = baseApi.injectEndpoints({
         url: `/post/like-unlike-comment/${commentId}/${postId}`,
         method: 'POST',
       }),
+      invalidatesTags: ['Comments'],
     }),
     repost: builder.mutation<{ success: boolean; message: string }, { postId: string; content?: string; visibility: string }>({
       query: (body) => ({
@@ -100,6 +113,12 @@ export const postApi = baseApi.injectEndpoints({
         body,
       }),
       invalidatesTags: ['Feed'],
+    }),
+    sharePostInApp: builder.mutation<{ success: boolean }, { postId: string; receiverId: string }>({
+      query: ({ postId, receiverId }) => ({
+        url: `/post/share-post-in-app/${postId}/${receiverId}`,
+        method: 'POST',
+      }),
     }),
     sharePostExternally: builder.mutation<{ success: boolean; message: string }, string>({
       query: (postId) => ({
@@ -122,6 +141,7 @@ export const {
   useGetUserPostsQuery,
   useGetPostQuery,
   useGetPostCommentsQuery,
+  useGetCommentRepliesQuery,
   useCreatePostMutation,
   useUpdatePostMutation,
   useDeletePostMutation,
@@ -130,9 +150,11 @@ export const {
   useBookmarkPostMutation,
   useCommentOnPostMutation,
   useReplyToCommentMutation,
+  useEditCommentMutation,
   useDeleteCommentMutation,
   useLikeCommentMutation,
   useRepostMutation,
+  useSharePostInAppMutation,
   useSharePostExternallyMutation,
   useGeneratePostPresignedUrlMutation,
 } = postApi;

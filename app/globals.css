@@ -140,3 +140,64 @@
     @apply font-sans;
   }
 }
+
+/* ── Clean line-style tabs (Base UI uses data-active, not data-[state=active]) ── */
+.tab-line [data-slot="tabs-trigger"] {
+  border-top: none !important;
+  border-left: none !important;
+  border-right: none !important;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  margin-bottom: -1px;
+}
+
+.tab-line [data-slot="tabs-trigger"][data-active] {
+  background-color: transparent !important;
+  box-shadow: none !important;
+  border-top-color: transparent !important;
+  border-left-color: transparent !important;
+  border-right-color: transparent !important;
+  border-bottom-color: var(--brand-dark) !important;
+  color: var(--foreground);
+}
+
+.dark .tab-line [data-slot="tabs-trigger"][data-active] {
+  background-color: transparent !important;
+  border-bottom-color: var(--brand-medium) !important;
+}
+
+@keyframes scale-pop {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  45% {
+    transform: scale(1.3);
+    opacity: 0.95;
+  }
+  55% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.85);
+    opacity: 0;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-scale-pop {
+  animation: scale-pop 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.25s ease-out forwards;
+}

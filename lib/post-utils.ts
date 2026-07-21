@@ -23,6 +23,7 @@ export function normalizeFeedPost(raw: Record<string, unknown>): Post {
     viewsCount: Number(raw.viewsCount ?? raw.viewCount ?? 0),
     isLiked: Boolean(raw.isLiked),
     isBookmarked: Boolean(raw.isBookmarked),
+    isReposted: Boolean(raw.isReposted),
     isOwnPost: Boolean(raw.isOwnPost),
     isFollowingAuthor: Boolean(raw.isFollowingAuthor),
     createdAt: raw.createdAt as string,

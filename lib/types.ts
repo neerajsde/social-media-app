@@ -39,6 +39,7 @@ export interface AuthState {
   isAuthenticated: boolean;
   otpToken: string | null;
   otpRequired: boolean;
+  isInitialized: boolean;
 }
 
 export interface LoginRequest {
@@ -109,6 +110,7 @@ export interface Post {
   viewsCount: number;
   isLiked?: boolean;
   isBookmarked?: boolean;
+  isReposted?: boolean;
   isOwner?: boolean;
   isFollowing?: boolean;
   createdAt: string;

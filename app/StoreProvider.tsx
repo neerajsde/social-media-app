@@ -4,7 +4,7 @@ import { Provider } from 'react-redux'
 import { makeStore, AppStore } from '../lib/store'
 import { useAppDispatch, useAppSelector } from '../lib/hooks'
 import { useGetProfileQuery } from '../lib/features/user/userApi'
-import { setUser, logout, setCredentials } from '../lib/features/auth/authSlice'
+import { setUser, logout, setCredentials, setAuthInitialized } from '../lib/features/auth/authSlice'
 
 function AuthInit({ children }: { children: React.ReactNode }) {
   const dispatch = useAppDispatch();
@@ -29,6 +29,8 @@ function AuthInit({ children }: { children: React.ReactNode }) {
       }
     } catch (e) {
       console.warn('Failed to restore auth session:', e);
+    } finally {
+      dispatch(setAuthInitialized(true));
     }
   }, [dispatch]);
 

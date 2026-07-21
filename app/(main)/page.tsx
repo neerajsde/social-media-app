@@ -32,7 +32,7 @@ export default function HomePage() {
   const [page, setPage] = useState(1);
   const [posts, setPosts] = useState<Post[]>([]);
   const [composerText, setComposerText] = useState('');
-  const { isAuthenticated, user } = useAppSelector((state) => state.auth);
+  const { isAuthenticated, user, isInitialized } = useAppSelector((state) => state.auth);
 
   const {
     data: feedData,
@@ -40,7 +40,7 @@ export default function HomePage() {
     isFetching,
     isError,
     refetch,
-  } = useGetFeedQuery({ page, limit: FEED_LIMIT, type: activeTab });
+  } = useGetFeedQuery({ page, limit: FEED_LIMIT, type: activeTab }, { skip: !isInitialized });
 
   const [createPost, { isLoading: isPublishing }] = useCreatePostMutation();
 
@@ -48,6 +48,12 @@ export default function HomePage() {
     setPage(1);
     setPosts([]);
   }, [activeTab]);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      refetch();
+    }
+  }, [isAuthenticated, refetch]);
 
   useEffect(() => {
     if (!feedData?.data) return;
@@ -104,24 +110,24 @@ export default function HomePage() {
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto border-x border-border/50 min-h-screen">
+    <div className="w-full max-w-2xl mx-auto border-x border-border/40 min-h-screen">
       {/* Header */}
-      <div className="sticky top-0 z-20 bg-background/80 backdrop-blur-xl border-b border-border">
+      <div className="sticky top-0 z-20 bg-background/85 backdrop-blur-xl">
         <div className="px-3 sm:px-4 py-3">
-          <h1 className="text-base sm:text-lg font-bold font-heading">Home</h1>
+          <h1 className="text-base sm:text-lg font-bold font-heading tracking-tight">Home</h1>
         </div>
-        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-          <TabsList className="w-full bg-transparent justify-stretch rounded-none border-b-0 p-0 h-auto">
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full tab-line">
+          <TabsList className="w-full bg-transparent justify-stretch rounded-none border-b border-border/60 p-0 h-auto gap-0">
             <TabsTrigger
               value="foryou"
-              className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-brand-dark dark:data-[state=active]:border-brand-medium data-[state=active]:bg-transparent data-[state=active]:shadow-none py-2.5 sm:py-3 text-xs sm:text-sm font-medium data-[state=active]:text-foreground gap-1 sm:gap-1.5"
+              className="flex-1 py-2.5 sm:py-3 text-xs sm:text-sm font-medium text-muted-foreground data-active:text-foreground gap-1 sm:gap-1.5"
             >
               <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
               <span className="truncate">For You</span>
             </TabsTrigger>
             <TabsTrigger
               value="following"
-              className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-brand-dark dark:data-[state=active]:border-brand-medium data-[state=active]:bg-transparent data-[state=active]:shadow-none py-2.5 sm:py-3 text-xs sm:text-sm font-medium data-[state=active]:text-foreground gap-1 sm:gap-1.5"
+              className="flex-1 py-2.5 sm:py-3 text-xs sm:text-sm font-medium text-muted-foreground data-active:text-foreground gap-1 sm:gap-1.5"
             >
               <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
               <span className="truncate">Following</span>
@@ -132,7 +138,7 @@ export default function HomePage() {
 
       {/* Feed Composer */}
       {isAuthenticated && user && (
-        <div className="p-3 sm:p-4 border-b border-border bg-card/15 flex gap-2.5 sm:gap-3">
+        <div className="p-4 mb-4 mx-3 sm:mx-4 border border-border/20 bg-card rounded-2xl flex gap-3 shadow-sm">
           <Avatar className="w-9 h-9 sm:w-10 sm:h-10 border border-border shrink-0">
             <AvatarImage src={user.avatarUrl} alt={user.username} />
             <AvatarFallback className="bg-brand-medium/20 text-brand-dark text-xs">
@@ -141,7 +147,7 @@ export default function HomePage() {
           </Avatar>
           <div className="flex-1 min-w-0 space-y-2.5 sm:space-y-3">
             <textarea
-              placeholder="What's happening today?"
+              placeholder={`What's happening today, ${user.first_name || user.username}?`}
               value={composerText}
               onChange={(e) => setComposerText(e.target.value)}
               disabled={isPublishing}
@@ -184,7 +190,7 @@ export default function HomePage() {
               <Button
                 onClick={handlePostCompose}
                 disabled={!composerText.trim() || isPublishing}
-                className="w-full sm:w-auto bg-brand-dark hover:bg-brand-dark/90 text-brand-lightest rounded-full px-5 h-9 sm:h-8 text-xs font-semibold shrink-0"
+                className="w-full sm:w-auto bg-[#05a85c] hover:bg-[#049652] text-white rounded-xl px-6 h-9 sm:h-9 text-sm font-semibold shrink-0"
               >
                 {isPublishing ? (
                   <Loader2 className="w-3.5 h-3.5 animate-spin" />
