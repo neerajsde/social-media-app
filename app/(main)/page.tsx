@@ -138,7 +138,7 @@ export default function HomePage() {
 
       {/* Feed Composer */}
       {isAuthenticated && user && (
-        <div className="p-3 sm:p-4 border-b border-border/40 bg-card/20 flex gap-2.5 sm:gap-3">
+        <div className="p-4 mb-4 mx-3 sm:mx-4 border border-border/20 bg-card rounded-2xl flex gap-3 shadow-sm">
           <Avatar className="w-9 h-9 sm:w-10 sm:h-10 border border-border shrink-0">
             <AvatarImage src={user.avatarUrl} alt={user.username} />
             <AvatarFallback className="bg-brand-medium/20 text-brand-dark text-xs">
@@ -147,7 +147,7 @@ export default function HomePage() {
           </Avatar>
           <div className="flex-1 min-w-0 space-y-2.5 sm:space-y-3">
             <textarea
-              placeholder="What's happening today?"
+              placeholder={`What's happening today, ${user.first_name || user.username}?`}
               value={composerText}
               onChange={(e) => setComposerText(e.target.value)}
               disabled={isPublishing}
@@ -190,7 +190,7 @@ export default function HomePage() {
               <Button
                 onClick={handlePostCompose}
                 disabled={!composerText.trim() || isPublishing}
-                className="w-full sm:w-auto bg-brand-dark hover:bg-brand-dark/90 text-brand-lightest rounded-full px-5 h-9 sm:h-8 text-xs font-semibold shrink-0"
+                className="w-full sm:w-auto bg-[#05a85c] hover:bg-[#049652] text-white rounded-xl px-6 h-9 sm:h-9 text-sm font-semibold shrink-0"
               >
                 {isPublishing ? (
                   <Loader2 className="w-3.5 h-3.5 animate-spin" />

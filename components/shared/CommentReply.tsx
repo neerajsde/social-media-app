@@ -39,7 +39,7 @@ export default function CommentReply({
   const [editComment, { isLoading: isEditingLoading }] = useEditCommentMutation();
   const [deleteComment, { isLoading: isDeletingLoading }] = useDeleteCommentMutation();
 
-  const author = reply.author || {
+  const author = reply.author || (reply as any).user || {
     id: 'unknown',
     username: 'anonymous',
     avatarUrl: undefined,
@@ -73,6 +73,20 @@ export default function CommentReply({
   };
 
   const isReplyOwner = author.id === currentUser?.id;
+
+  const renderContentWithMentions = (text: string) => {
+    const parts = text.split(/(@\w+)/g);
+    return parts.map((part, i) => {
+      if (part.startsWith('@')) {
+        return (
+          <Link key={i} href={`/profile/${part.substring(1)}`} className="text-[#05a85c] hover:underline font-semibold">
+            {part}
+          </Link>
+        );
+      }
+      return <span key={i}>{part}</span>;
+    });
+  };
 
   return (
     <div className="flex items-start gap-3 p-3 rounded-xl border border-border/30 bg-card/25 hover:bg-card/40 transition-colors animate-in fade-in slide-in-from-left-2 duration-200">
@@ -165,8 +179,8 @@ export default function CommentReply({
             </div>
           </div>
         ) : (
-          <p className="text-xs text-foreground/90 leading-relaxed break-words pr-2">
-            {reply.content}
+          <p className="text-xs text-foreground/90 leading-relaxed break-words pr-2 whitespace-pre-wrap">
+            {renderContentWithMentions(reply.content)}
           </p>
         )}
 
@@ -180,7 +194,7 @@ export default function CommentReply({
             commentId={reply.id}
             postId={postId}
             initialIsLiked={reply.isLiked || false}
-            initialLikesCount={reply.likesCount || 0}
+            initialLikesCount={reply.likesCount ?? (reply as any).likeCount ?? 0}
           />
 
           {onReplyTrigger && (

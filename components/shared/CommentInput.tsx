@@ -6,10 +6,10 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useAppSelector } from '@/lib/hooks';
-import { mockUsers } from '@/lib/mock-data';
-import type { User } from '@/lib/types';
+import type { User, SearchUserResult } from '@/lib/types';
 import LoginRequiredDialog from './LoginRequiredDialog';
 import { cn } from '@/lib/utils';
+import { useLazySearchQuery } from '@/lib/features/search/searchApi';
 
 interface CommentInputProps {
   onSubmit: (content: string) => Promise<void>;
@@ -34,7 +34,8 @@ export default function CommentInput({
   const [isLoading, setIsLoading] = useState(false);
   const [mentionSearch, setMentionSearch] = useState<string | null>(null);
   const [showMentions, setShowMentions] = useState(false);
-  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
+  const [filteredUsers, setFilteredUsers] = useState<SearchUserResult[]>([]);
+  const [triggerSearch, { isFetching: isSearching }] = useLazySearchQuery();
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -65,7 +66,7 @@ export default function CommentInput({
     return () => document.removeEventListener('mousedown', handleOutsideClick);
   }, []);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleInputChange = async (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value;
     if (value.length > CHARACTER_LIMIT) return;
     setContent(value);
@@ -79,12 +80,24 @@ export default function CommentInput({
       setMentionSearch(search);
       setShowMentions(true);
 
-      const matching = mockUsers.filter(
-        (u) =>
-          u.username.toLowerCase().includes(search.toLowerCase()) ||
-          `${u.first_name || ''} ${u.last_name || ''}`.toLowerCase().includes(search.toLowerCase())
-      );
-      setFilteredUsers(matching);
+      if (search.trim().length > 0) {
+        try {
+          const res = await triggerSearch({ q: search, type: 'account', limit: 10 }).unwrap();
+          if (res.success && Array.isArray(res.data)) {
+            setFilteredUsers(res.data as SearchUserResult[]);
+          }
+        } catch (err) {
+          console.error('Mention search failed:', err);
+        }
+      } else {
+        // If just '@', fetch some default users or leave empty
+        try {
+          const res = await triggerSearch({ type: 'account', limit: 10 }).unwrap();
+          if (res.success && Array.isArray(res.data)) {
+            setFilteredUsers(res.data as SearchUserResult[]);
+          }
+        } catch (err) {}
+      }
     } else {
       setShowMentions(false);
       setMentionSearch(null);
@@ -105,17 +118,22 @@ export default function CommentInput({
     }
   };
 
-  const handleTriggerMention = () => {
+  const handleTriggerMention = async () => {
     if (!isAuthenticated) {
       setShowAuthDialog(true);
       return;
     }
     setContent((prev) => prev + '@');
     setShowMentions(true);
-    setFilteredUsers(mockUsers);
     if (textareaRef.current) {
       textareaRef.current.focus();
     }
+    try {
+      const res = await triggerSearch({ type: 'account', limit: 10 }).unwrap();
+      if (res.success && Array.isArray(res.data)) {
+        setFilteredUsers(res.data as SearchUserResult[]);
+      }
+    } catch (err) {}
   };
 
   const handleFormSubmit = async (e: React.FormEvent) => {
@@ -145,8 +163,9 @@ export default function CommentInput({
         {/* Mentions Dropdown list */}
         {showMentions && filteredUsers.length > 0 && (
           <div className="absolute bottom-full left-0 mb-2 w-64 bg-card border border-border/80 rounded-2xl shadow-xl z-50 overflow-hidden divide-y divide-border/40 animate-in slide-in-from-bottom-2 fade-in duration-200">
-            <div className="px-3 py-1.5 text-[10px] font-bold text-muted-foreground uppercase tracking-wider bg-accent/20">
-              Mention user
+            <div className="px-3 py-1.5 text-[10px] font-bold text-muted-foreground uppercase tracking-wider bg-accent/20 flex items-center justify-between">
+              <span>Mention user</span>
+              {isSearching && <Loader2 className="w-3 h-3 animate-spin text-muted-foreground" />}
             </div>
             <div className="max-h-48 overflow-y-auto scrollbar-thin">
               {filteredUsers.map((u) => (

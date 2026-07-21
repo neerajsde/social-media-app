@@ -58,10 +58,6 @@ export default function CommentSection({
 
   return (
     <div className="space-y-4">
-      {/* Header comment stats */}
-      <div className="text-xs font-bold text-muted-foreground px-1 uppercase tracking-wider flex items-center justify-between">
-        <span>Comments ({totalComments})</span>
-      </div>
 
       <div className="space-y-4 divide-y divide-border/10">
         {comments.map((comment) => (

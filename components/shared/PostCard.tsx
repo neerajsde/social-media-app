@@ -118,7 +118,7 @@ export default function PostCard({ post, showMedia = true }: PostCardProps) {
 
   return (
     <>
-      <Card className="border-border/50 shadow-sm hover:shadow-md transition-all duration-300 bg-card/40 backdrop-blur-md rounded-2xl overflow-hidden">
+      <Card className="border-border/20 shadow-sm hover:shadow-md transition-all duration-300 bg-card rounded-2xl overflow-hidden">
         <CardContent className="p-0">
           {/* Header */}
           <PostHeader post={post} />
@@ -139,7 +139,7 @@ export default function PostCard({ post, showMedia = true }: PostCardProps) {
                   <Link key={tag} href={`/search?q=${tag}`}>
                     <Badge
                       variant="secondary"
-                      className="text-xs font-normal hover:bg-brand-dark/15 dark:hover:bg-brand-medium/20 cursor-pointer transition-colors bg-accent/40 text-muted-foreground hover:text-foreground py-0.5 px-2.5 rounded-full"
+                      className="text-xs font-normal cursor-pointer transition-colors bg-white/5 hover:bg-white/10 text-muted-foreground hover:text-foreground py-0.5 px-3 rounded-full border border-white/5"
                     >
                       #{tag}
                     </Badge>

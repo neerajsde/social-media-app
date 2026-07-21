@@ -57,7 +57,7 @@ export default function CommentItem({ comment, postId }: CommentItemProps) {
     { skip: !showRepliesList }
   );
 
-  const author = comment.author || {
+  const author = comment.author || (comment as any).user || {
     id: 'unknown',
     username: 'anonymous',
     avatarUrl: undefined,
@@ -102,8 +102,9 @@ export default function CommentItem({ comment, postId }: CommentItemProps) {
     }
   };
 
-  const repliesList = repliesResponse?.data || [];
-  const repliesTotal = repliesResponse?.total || comment.repliesCount || comment.replies?.length || 0;
+  const rawReplies = repliesResponse?.data as any;
+  const repliesList = (Array.isArray(rawReplies) ? rawReplies : (rawReplies?.comments || [])) as Comment[];
+  const repliesTotal = repliesResponse?.total || comment.repliesCount || (comment as any).replyCount || comment.replies?.length || 0;
   const hasMoreReplies = repliesList.length < repliesTotal;
 
   const handleLoadMoreReplies = () => {
@@ -111,6 +112,20 @@ export default function CommentItem({ comment, postId }: CommentItemProps) {
   };
 
   const isCommentOwner = author.id === currentUser?.id;
+
+  const renderContentWithMentions = (text: string) => {
+    const parts = text.split(/(@\w+)/g);
+    return parts.map((part, i) => {
+      if (part.startsWith('@')) {
+        return (
+          <Link key={i} href={`/profile/${part.substring(1)}`} className="text-[#05a85c] hover:underline font-semibold">
+            {part}
+          </Link>
+        );
+      }
+      return <span key={i}>{part}</span>;
+    });
+  };
 
   return (
     <div className="space-y-2 border-b border-border/20 pb-4">
@@ -206,7 +221,7 @@ export default function CommentItem({ comment, postId }: CommentItemProps) {
             </div>
           ) : (
             <p className="text-xs sm:text-sm text-foreground/95 leading-relaxed break-words pr-2 whitespace-pre-wrap">
-              {comment.content}
+              {renderContentWithMentions(comment.content)}
             </p>
           )}
 
@@ -220,7 +235,7 @@ export default function CommentItem({ comment, postId }: CommentItemProps) {
               commentId={comment.id}
               postId={postId}
               initialIsLiked={comment.isLiked || false}
-              initialLikesCount={comment.likesCount || 0}
+              initialLikesCount={comment.likesCount ?? (comment as any).likeCount ?? 0}
             />
 
             <ReplyButton
