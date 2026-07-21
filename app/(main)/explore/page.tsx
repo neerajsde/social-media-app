@@ -15,7 +15,7 @@ export default function ExplorePage() {
   const [tab, setTab] = useState('trending');
 
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="w-full max-w-2xl border-r border-border/40 min-h-screen">
       <div className="sticky top-0 z-20 bg-background/85 backdrop-blur-xl">
         <div className="flex items-center gap-2 px-4 py-3">
           <Compass className="w-5 h-5 text-brand-dark dark:text-brand-medium" />

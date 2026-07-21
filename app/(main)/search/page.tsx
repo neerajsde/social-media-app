@@ -136,7 +136,7 @@ function SearchPageContent() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="w-full max-w-2xl border-r border-border/40 min-h-screen">
       <div className="sticky top-0 z-20 bg-background/80 backdrop-blur-xl border-b border-border p-4 space-y-3">
         <div className="relative">
           <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />

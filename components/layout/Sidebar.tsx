@@ -2,9 +2,11 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useState } from 'react';
 import {
   Home, Search, Bell, MessageCircle, Bookmark, User,
   Settings, PlusSquare, TrendingUp, LogOut, Compass, MoreHorizontal,
+  PanelLeftClose, PanelLeftOpen, Menu
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -13,6 +15,7 @@ import { useAppSelector, useAppDispatch } from '@/lib/hooks';
 import { cn } from '@/lib/utils';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { logout } from '@/lib/features/auth/authSlice';
+import { toggleSidebar } from '@/lib/features/ui/uiSlice';
 import { toast } from 'sonner';
 
 const navItems = [
@@ -32,22 +35,48 @@ export default function Sidebar() {
   const pathname = usePathname();
   const dispatch = useAppDispatch();
   const { isAuthenticated, user } = useAppSelector((state) => state.auth);
+  
+  const isCollapsed = useAppSelector((state) => state.ui.isSidebarCollapsed);
 
   return (
     <TooltipProvider delay={0}>
-      <aside className="sticky top-0 h-screen w-[68px] xl:w-[248px] border-r border-border/40 flex flex-col bg-background/98 backdrop-blur-xl z-30 shrink-0">
-        {/* Logo */}
-        <div className="h-16 flex items-center px-3 xl:px-5 border-b border-border/40">
-          <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-dark to-brand-medium flex items-center justify-center shadow-lg shadow-brand-dark/30 group-hover:shadow-brand-dark/50 transition-shadow shrink-0">
+      <aside className={cn(
+        "sticky top-0 h-screen border-r border-border/40 flex flex-col bg-background/98 backdrop-blur-xl z-30 shrink-0 transition-all duration-300",
+        isCollapsed ? "w-[68px]" : "w-[68px] xl:w-[248px]"
+      )}>
+        {/* Logo and Toggle Header */}
+        <div className={cn("h-16 flex items-center border-b border-border/40 transition-all duration-300 group/header relative", isCollapsed ? "justify-center px-0" : "px-3 xl:px-5 justify-between")}>
+          <Link href="/" className={cn("flex items-center gap-3 group/logo transition-opacity duration-200", isCollapsed && "group-hover/header:opacity-0")}>
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-dark to-brand-medium flex items-center justify-center shadow-lg shadow-brand-dark/30 group-hover/logo:shadow-brand-dark/50 transition-shadow shrink-0">
               <TrendingUp className="w-4 h-4 text-white" />
             </div>
-            <span className="hidden xl:block text-lg font-bold text-foreground tracking-tight">NexusPlay</span>
+            <span className={cn("text-lg font-bold text-foreground tracking-tight transition-all duration-300", isCollapsed ? "hidden" : "hidden xl:block")}>NexusPlay</span>
           </Link>
+
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => dispatch(toggleSidebar())}
+                className={cn(
+                  "text-muted-foreground hover:text-foreground transition-opacity duration-200 z-10",
+                  isCollapsed 
+                    ? "absolute inset-0 m-auto opacity-0 group-hover/header:opacity-100" 
+                    : "hidden xl:flex opacity-0 group-hover/header:opacity-100 shrink-0"
+                )}
+              >
+                {isCollapsed ? <PanelLeftOpen className="w-5 h-5" /> : <PanelLeftClose className="w-5 h-5" />}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="right" className="font-medium">
+              {isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+            </TooltipContent>
+          </Tooltip>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 flex flex-col gap-0.5 px-2 xl:px-3 py-4 overflow-y-auto">
+        <nav className="flex-1 flex flex-col gap-0.5 px-2 xl:px-3 py-4 overflow-y-auto overflow-x-hidden">
           {navItems.map(({ href, icon: Icon, label, auth: requiresAuth }) => {
             if (requiresAuth && !isAuthenticated) return null;
             const isActive = pathname === href;
@@ -72,9 +101,9 @@ export default function Sidebar() {
                     'w-5 h-5 shrink-0 transition-transform duration-200 group-hover:scale-110',
                     isActive ? 'text-brand-dark dark:text-brand-medium' : ''
                   )} />
-                  <span className="hidden xl:block truncate">{label}</span>
+                  <span className={cn("truncate transition-all duration-300", isCollapsed ? "hidden" : "hidden xl:block")}>{label}</span>
                 </TooltipTrigger>
-                <TooltipContent side="right" className="xl:hidden font-medium">
+                <TooltipContent side="right" className={cn("font-medium", !isCollapsed && "xl:hidden")}>
                   {label}
                 </TooltipContent>
               </Tooltip>
@@ -92,9 +121,9 @@ export default function Sidebar() {
                   />
                 }>
                   <PlusSquare className="w-5 h-5 shrink-0 group-hover:rotate-90 transition-transform duration-300" />
-                  <span className="hidden xl:block">Create Post</span>
+                  <span className={cn("transition-all duration-300 whitespace-nowrap", isCollapsed ? "hidden" : "hidden xl:block")}>Create Post</span>
                 </TooltipTrigger>
-                <TooltipContent side="right" className="xl:hidden font-medium">
+                <TooltipContent side="right" className={cn("font-medium", !isCollapsed && "xl:hidden")}>
                   Create Post
                 </TooltipContent>
               </Tooltip>
@@ -104,6 +133,8 @@ export default function Sidebar() {
 
         {/* Bottom section */}
         <div className="px-2 xl:px-3 pb-4 space-y-0.5 border-t border-border/40 pt-3">
+
+
           {secondaryItems.map(({ href, icon: Icon, label, auth: requiresAuth }) => {
             if (requiresAuth && !isAuthenticated) return null;
             const isActive = pathname === href;
@@ -121,9 +152,9 @@ export default function Sidebar() {
                   />
                 }>
                   <Icon className="w-5 h-5 shrink-0" />
-                  <span className="hidden xl:block">{label}</span>
+                  <span className={cn("truncate transition-all duration-300", isCollapsed ? "hidden" : "hidden xl:block")}>{label}</span>
                 </TooltipTrigger>
-                <TooltipContent side="right" className="xl:hidden font-medium">
+                <TooltipContent side="right" className={cn("font-medium", !isCollapsed && "xl:hidden")}>
                   {label}
                 </TooltipContent>
               </Tooltip>
@@ -140,14 +171,14 @@ export default function Sidebar() {
                       {user.first_name?.[0] || user.username[0]}
                     </AvatarFallback>
                   </Avatar>
-                  <div className="hidden xl:block min-w-0 flex-1">
+                  <div className={cn("min-w-0 flex-1 transition-all duration-300", isCollapsed ? "hidden" : "hidden xl:block")}>
                     <p className="text-sm font-semibold text-foreground truncate leading-tight">{user.first_name} {user.last_name}</p>
                     <p className="text-xs text-muted-foreground truncate">@{user.username}</p>
                   </div>
-                  <MoreHorizontal className="w-4 h-4 text-muted-foreground hidden xl:block shrink-0 ml-auto" />
+                  <MoreHorizontal className={cn("w-4 h-4 text-muted-foreground shrink-0 ml-auto transition-all duration-300", isCollapsed ? "hidden" : "hidden xl:block")} />
                 </button>
               } />
-              <DropdownMenuContent align="start" className="w-[200px] mb-2 z-50 bg-card/95 backdrop-blur-xl border-border/80">
+              <DropdownMenuContent align={isCollapsed ? "center" : "start"} sideOffset={12} className="w-[200px] mb-2 z-50 bg-card/95 backdrop-blur-xl border-border/80">
                 <DropdownMenuItem render={<Link href={`/profile/${user.username}`} />}>
                   <User className="w-4 h-4 mr-2" />
                   View Profile
@@ -170,8 +201,8 @@ export default function Sidebar() {
             <div className="flex flex-col gap-2 mt-2">
               <Link href="/login">
                 <Button variant="outline" size="sm" className="w-full justify-center xl:justify-start rounded-xl border-brand-dark/30 text-brand-dark dark:text-brand-medium dark:border-brand-medium/30 hover:bg-brand-dark/10">
-                  <LogOut className="w-4 h-4 xl:mr-2" />
-                  <span className="hidden xl:inline">Log In</span>
+                  <LogOut className={cn("w-4 h-4 transition-all duration-300", isCollapsed ? "mr-0" : "xl:mr-2")} />
+                  <span className={cn("transition-all duration-300", isCollapsed ? "hidden" : "hidden xl:inline")}>Log In</span>
                 </Button>
               </Link>
             </div>

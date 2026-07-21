@@ -5,8 +5,10 @@ import { Search, Send, Check, Loader2 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { mockUsers } from '@/lib/mock-data';
 import { useLazySearchQuery } from '@/lib/features/search/searchApi';
+import { useGetFollowingQuery } from '@/lib/features/user/userApi';
+import { useSelector } from 'react-redux';
+import type { RootState } from '@/lib/store';
 import type { User } from '@/lib/types';
 import { cn } from '@/lib/utils';
 
@@ -16,15 +18,25 @@ interface ShareUserListProps {
 }
 
 export default function ShareUserList({ postId, onShare }: ShareUserListProps) {
+  const currentUser = useSelector((state: RootState) => state.auth.user);
+  const { data: followingData } = useGetFollowingQuery(
+    { userId: currentUser?.id || '' },
+    { skip: !currentUser?.id }
+  );
+
   const [query, setQuery] = useState('');
-  const [users, setUsers] = useState<User[]>(mockUsers);
+  const [users, setUsers] = useState<User[]>([]);
   const [sendingState, setSendingState] = useState<Record<string, 'idle' | 'sending' | 'sent'>>({});
   
   const [triggerSearch, { data: searchResponse, isFetching }] = useLazySearchQuery();
 
   useEffect(() => {
     if (query.trim() === '') {
-      setUsers(mockUsers);
+      if (followingData?.success && followingData.data?.items) {
+        setUsers(followingData.data.items);
+      } else {
+        setUsers([]);
+      }
       return;
     }
 
@@ -33,7 +45,7 @@ export default function ShareUserList({ postId, onShare }: ShareUserListProps) {
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [query, triggerSearch]);
+  }, [query, triggerSearch, followingData]);
 
   useEffect(() => {
     if (searchResponse?.success && Array.isArray(searchResponse.data)) {

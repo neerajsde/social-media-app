@@ -170,7 +170,7 @@ export default function CreatePostPage() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-4 space-y-6">
+    <div className="w-full max-w-2xl border-r border-border/40 p-4 space-y-6 min-h-screen">
       <div className="flex items-center justify-between pb-2 border-b border-border">
         <h1 className="text-xl font-bold font-heading">Create Post</h1>
         <div className="flex items-center gap-2">

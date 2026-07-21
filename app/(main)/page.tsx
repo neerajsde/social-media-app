@@ -110,7 +110,7 @@ export default function HomePage() {
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto border-x border-border/40 min-h-screen">
+    <div className="w-full max-w-2xl border-r border-border/40 min-h-screen">
       {/* Header */}
       <div className="sticky top-0 z-20 bg-background/85 backdrop-blur-xl">
         <div className="px-3 sm:px-4 py-3">
