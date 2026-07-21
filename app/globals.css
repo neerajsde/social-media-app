@@ -141,6 +141,31 @@
   }
 }
 
+/* ── Clean line-style tabs (Base UI uses data-active, not data-[state=active]) ── */
+.tab-line [data-slot="tabs-trigger"] {
+  border-top: none !important;
+  border-left: none !important;
+  border-right: none !important;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  margin-bottom: -1px;
+}
+
+.tab-line [data-slot="tabs-trigger"][data-active] {
+  background-color: transparent !important;
+  box-shadow: none !important;
+  border-top-color: transparent !important;
+  border-left-color: transparent !important;
+  border-right-color: transparent !important;
+  border-bottom-color: var(--brand-dark) !important;
+  color: var(--foreground);
+}
+
+.dark .tab-line [data-slot="tabs-trigger"][data-active] {
+  background-color: transparent !important;
+  border-bottom-color: var(--brand-medium) !important;
+}
+
 @keyframes scale-pop {
   0% {
     transform: scale(0);

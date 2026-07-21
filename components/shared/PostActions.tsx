@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Heart, MessageCircle, Repeat2, Share2, Bookmark, Eye, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -45,8 +45,16 @@ export default function PostActions({
   const [internalLiked, setInternalLiked] = useState(post.isLiked || false);
   const [internalLikeCount, setInternalLikeCount] = useState(post.likesCount || 0);
   const [internalBookmarked, setInternalBookmarked] = useState(post.isBookmarked || false);
-  const [reposted, setReposted] = useState(false);
+  const [reposted, setReposted] = useState(post.isReposted || false);
   const [repostsCount, setRepostsCount] = useState(post.sharesCount || 0);
+
+  useEffect(() => {
+    setInternalLiked(post.isLiked || false);
+    setInternalLikeCount(post.likesCount || 0);
+    setInternalBookmarked(post.isBookmarked || false);
+    setReposted(post.isReposted || false);
+    setRepostsCount(post.sharesCount || 0);
+  }, [post.isLiked, post.likesCount, post.isBookmarked, post.isReposted, post.sharesCount]);
 
   const [likePost, { isLoading: isLiking }] = useLikePostMutation();
   const [dislikePost, { isLoading: isDisliking }] = useDislikePostMutation();
@@ -235,23 +243,34 @@ export default function PostActions({
         </div>
 
         {/* Stats Summary */}
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 px-2 text-xs font-semibold text-muted-foreground/90">
-          <span className="cursor-pointer hover:text-foreground transition-colors" onClick={handleLikeClick}>
-            <span className="text-foreground font-bold tabular-nums mr-0.5">{formatCount(likeCount)}</span> likes
-          </span>
-          <span>•</span>
-          <span className="cursor-pointer hover:text-foreground transition-colors" onClick={onCommentClick}>
-            <span className="text-foreground font-bold tabular-nums mr-0.5">{formatCount(post.commentsCount ?? 0)}</span> comments
-          </span>
-          {repostsCount > 0 && (
-            <>
-              <span>•</span>
-              <span>
-                <span className="text-foreground font-bold tabular-nums mr-0.5">{formatCount(repostsCount)}</span> shares
-              </span>
-            </>
-          )}
-        </div>
+        {(likeCount > 0 || (post.commentsCount ?? 0) > 0 || repostsCount > 0) && (
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 px-2 text-xs font-semibold text-muted-foreground/90">
+            {[
+              likeCount > 0 && (
+                <span key="likes" className="cursor-pointer hover:text-foreground transition-colors" onClick={handleLikeClick}>
+                  <span className="text-foreground font-bold tabular-nums mr-0.5">{formatCount(likeCount)}</span> likes
+                </span>
+              ),
+              (post.commentsCount ?? 0) > 0 && (
+                <span key="comments" className="cursor-pointer hover:text-foreground transition-colors" onClick={onCommentClick}>
+                  <span className="text-foreground font-bold tabular-nums mr-0.5">{formatCount(post.commentsCount ?? 0)}</span> comments
+                </span>
+              ),
+              repostsCount > 0 && (
+                <span key="shares">
+                  <span className="text-foreground font-bold tabular-nums mr-0.5">{formatCount(repostsCount)}</span> shares
+                </span>
+              ),
+            ]
+              .filter(Boolean)
+              .map((stat, i, arr) => (
+                <div key={i} className="flex items-center gap-2">
+                  {stat}
+                  {i < arr.length - 1 && <span className="text-muted-foreground/50">•</span>}
+                </div>
+              ))}
+          </div>
+        )}
       </div>
 
       <LoginRequiredDialog open={showAuthDialog} onOpenChange={setShowAuthDialog} />

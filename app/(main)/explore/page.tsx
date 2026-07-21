@@ -16,13 +16,13 @@ export default function ExplorePage() {
 
   return (
     <div className="max-w-2xl mx-auto">
-      <div className="sticky top-0 z-20 bg-background/80 backdrop-blur-xl border-b border-border px-4 py-3">
-        <div className="flex items-center gap-2 mb-3">
+      <div className="sticky top-0 z-20 bg-background/85 backdrop-blur-xl">
+        <div className="flex items-center gap-2 px-4 py-3">
           <Compass className="w-5 h-5 text-brand-dark dark:text-brand-medium" />
-          <h1 className="text-lg font-bold">Explore</h1>
+          <h1 className="text-lg font-bold tracking-tight">Explore</h1>
         </div>
-        <Tabs value={tab} onValueChange={setTab}>
-          <TabsList className="w-full bg-transparent justify-start rounded-none border-b-0 p-0 h-auto gap-0">
+        <Tabs value={tab} onValueChange={setTab} className="tab-line">
+          <TabsList className="w-full bg-transparent justify-start rounded-none border-b border-border/60 p-0 px-4 h-auto gap-0">
             {[
               { value: 'trending', icon: Flame, label: 'Trending' },
               { value: 'people', icon: Users, label: 'People' },
@@ -31,9 +31,9 @@ export default function ExplorePage() {
               <TabsTrigger
                 key={value}
                 value={value}
-                className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-brand-dark dark:data-[state=active]:border-brand-medium data-[state=active]:bg-transparent data-[state=active]:shadow-none py-3 text-sm font-medium"
+                className="flex-1 py-3 text-sm font-medium text-muted-foreground data-active:text-foreground gap-1.5"
               >
-                <Icon className="w-4 h-4 mr-1.5" />
+                <Icon className="w-4 h-4" />
                 {label}
               </TabsTrigger>
             ))}
