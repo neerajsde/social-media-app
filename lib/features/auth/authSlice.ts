@@ -8,6 +8,7 @@ const initialState: AuthState = {
   isAuthenticated: false,
   otpToken: null,
   otpRequired: false,
+  isInitialized: false,
 };
 
 // ─── Cookie helpers ──────────────────────────────────────────────────────────
@@ -70,9 +71,12 @@ const authSlice = createSlice({
         deleteCookie('accessToken');
       }
     },
+    setAuthInitialized: (state, action: PayloadAction<boolean>) => {
+      state.isInitialized = action.payload;
+    },
   },
 });
 
-export const { setCredentials, setUser, setOtpRequired, logout } = authSlice.actions;
+export const { setCredentials, setUser, setOtpRequired, logout, setAuthInitialized } = authSlice.actions;
 export default authSlice.reducer;
 

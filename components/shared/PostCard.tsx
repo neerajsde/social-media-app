@@ -15,6 +15,7 @@ import SharePostDialog from './SharePostDialog';
 import LoginRequiredDialog from './LoginRequiredDialog';
 import CommentInput from './CommentInput';
 import { useRouter } from 'next/navigation';
+import PostCommentsSheet from './PostCommentsSheet';
 
 interface PostCardProps {
   post: Post;
@@ -23,7 +24,7 @@ interface PostCardProps {
 
 export default function PostCard({ post, showMedia = true }: PostCardProps) {
   const router = useRouter();
-  const { isAuthenticated } = useAppSelector((state) => state.auth);
+  const { isAuthenticated, user } = useAppSelector((state) => state.auth);
   
   const [liked, setLiked] = useState(post.isLiked || false);
   const [likeCount, setLikeCount] = useState(post.likesCount || 0);
@@ -39,6 +40,9 @@ export default function PostCard({ post, showMedia = true }: PostCardProps) {
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [showAuthDialog, setShowAuthDialog] = useState(false);
   const [showCommentInput, setShowCommentInput] = useState(false);
+  const [showCommentsSheet, setShowCommentsSheet] = useState(false);
+  const [localComments, setLocalComments] = useState<{ id: string; username: string; content: string }[]>([]);
+  const [commentsCount, setCommentsCount] = useState(post.commentsCount || 0);
 
   const [likePost] = useLikePostMutation();
   const [dislikePost] = useDislikePostMutation();
@@ -102,6 +106,18 @@ export default function PostCard({ post, showMedia = true }: PostCardProps) {
     try {
       await commentOnPost({ postId: post.id, content }).unwrap();
       toast.success('Comment posted');
+      
+      // Optimistic UI update for the new comment
+      setLocalComments((prev) => [
+        ...prev,
+        {
+          id: Date.now().toString(),
+          username: user?.username || 'you',
+          content,
+        },
+      ]);
+      setCommentsCount((prev) => prev + 1);
+      
       setShowCommentInput(false);
     } catch (err: any) {
       toast.error(err?.data?.message || 'Failed to post comment');
@@ -116,6 +132,9 @@ export default function PostCard({ post, showMedia = true }: PostCardProps) {
     setShowShareDialog(true);
   };
 
+  const hasMedia = (post.images && post.images.length > 0) || post.video || post.mediaUrl || post.thumbnailUrl;
+  const actuallyShowMedia = showMedia && hasMedia;
+
   return (
     <>
       <Card className="border-border/20 shadow-sm hover:shadow-md transition-all duration-300 bg-card rounded-2xl overflow-hidden">
@@ -123,35 +142,34 @@ export default function PostCard({ post, showMedia = true }: PostCardProps) {
           {/* Header */}
           <PostHeader post={post} />
 
-          {/* Content & Tags */}
-          <div className="p-3 sm:p-4 pb-2 space-y-2.5">
-            {post.content && (
-              <Link href={`/post/${post.id}`}>
-                <p className="text-sm sm:text-[15px] leading-relaxed text-foreground/90 whitespace-pre-wrap hover:text-foreground transition-colors break-words pr-2">
-                  {post.content}
-                </p>
-              </Link>
-            )}
+          {/* Content if NO Media */}
+          {!actuallyShowMedia && (
+            <div className="px-4 py-3 space-y-2">
+              {post.content && (
+                <Link href={`/post/${post.id}`}>
+                  <p className="text-[15px] sm:text-base leading-relaxed text-foreground whitespace-pre-wrap break-words">
+                    {post.content}
+                  </p>
+                </Link>
+              )}
 
-            {post.tags && post.tags.length > 0 && (
-              <div className="flex flex-wrap gap-1.5 pt-1">
-                {post.tags.map((tag) => (
-                  <Link key={tag} href={`/search?q=${tag}`}>
-                    <Badge
-                      variant="secondary"
-                      className="text-xs font-normal cursor-pointer transition-colors bg-white/5 hover:bg-white/10 text-muted-foreground hover:text-foreground py-0.5 px-3 rounded-full border border-white/5"
-                    >
-                      #{tag}
-                    </Badge>
-                  </Link>
-                ))}
-              </div>
-            )}
-          </div>
+              {post.tags && post.tags.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 pt-1">
+                  {post.tags.map((tag) => (
+                    <Link key={tag} href={`/search?q=${tag}`}>
+                      <span className="text-[14px] text-brand-dark dark:text-brand-medium hover:underline cursor-pointer">
+                        #{tag}
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Media Player/Slideshow */}
-          {showMedia && (
-            <div className="px-3 sm:px-4 pb-2">
+          {actuallyShowMedia && (
+            <div className="w-full">
               <PostMedia post={post} onDoubleLike={handleLikeToggle} />
             </div>
           )}
@@ -168,12 +186,58 @@ export default function PostCard({ post, showMedia = true }: PostCardProps) {
             onShareClick={handleShareClick}
           />
 
+          {/* Content if HAS Media */}
+          {actuallyShowMedia && (
+            <div className="px-4 pb-2 space-y-1 mt-1">
+              {post.content && (
+                <Link href={`/post/${post.id}`}>
+                  <p className="text-[14px] leading-relaxed text-foreground whitespace-pre-wrap break-words">
+                    <span className="font-semibold mr-1.5 hover:underline cursor-pointer">
+                      {post.author?.username || post.user?.username || 'anonymous'}
+                    </span>
+                    {post.content}
+                  </p>
+                </Link>
+              )}
+
+              {post.tags && post.tags.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 pt-1">
+                  {post.tags.map((tag) => (
+                    <Link key={tag} href={`/search?q=${tag}`}>
+                      <span className="text-[14px] text-brand-dark dark:text-brand-medium hover:underline cursor-pointer">
+                        #{tag}
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* View All Comments & Local Comments */}
+          <div className="px-4 pb-1 space-y-1">
+            {commentsCount > 0 && (
+              <button
+                onClick={() => setShowCommentsSheet(true)}
+                className="text-[14px] text-muted-foreground hover:text-foreground cursor-pointer border-none bg-transparent p-0"
+              >
+                View all {commentsCount} comments
+              </button>
+            )}
+            {localComments.map((comment) => (
+              <div key={comment.id} className="text-[14px] leading-relaxed text-foreground break-words">
+                <span className="font-semibold mr-1.5">{comment.username}</span>
+                <span>{comment.content}</span>
+              </div>
+            ))}
+          </div>
+
           {showCommentInput && (
-            <div className="px-3 sm:px-4 pb-3">
+            <div className="px-4 pb-3 pt-2">
               <CommentInput 
                 onSubmit={handleCommentSubmit} 
                 autoFocus 
-                placeholder="Write a comment..." 
+                placeholder="Add a comment..." 
               />
             </div>
           )}
@@ -182,6 +246,7 @@ export default function PostCard({ post, showMedia = true }: PostCardProps) {
 
       <SharePostDialog postId={post.id} open={showShareDialog} onOpenChange={setShowShareDialog} />
       <LoginRequiredDialog open={showAuthDialog} onOpenChange={setShowAuthDialog} />
+      <PostCommentsSheet postId={post.id} open={showCommentsSheet} onOpenChange={setShowCommentsSheet} />
     </>
   );
 }

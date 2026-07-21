@@ -90,16 +90,21 @@ export default function PostHeader({ post, onEditClick }: PostHeaderProps) {
   };
 
   const isPostOwner = post.isOwnPost || author.id === currentUser?.id || post.user?.id === currentUser?.id;
-  const authorName = author.first_name
-    ? `${author.first_name} ${author.last_name || ''}`.trim()
-    : author.username;
+  
+  // Extract full name handling potential camelCase or snake_case API differences
+  const fName = author.first_name || (author as any).firstName || (author as any).name;
+  const lName = author.last_name || (author as any).lastName;
+  const actualFullName = fName ? `${fName} ${lName || ''}`.trim() : '';
+  
+  // If no full name exists, we fall back to username for the top line
+  const displayTopName = actualFullName || author.username;
 
   return (
     <>
-      <div className="flex items-center justify-between gap-3 p-3 sm:p-4 border-b border-border/40 bg-card/10 backdrop-blur-md rounded-t-xl">
+      <div className="flex items-center justify-between gap-3 p-3 sm:p-4 border-b border-border/10 bg-card rounded-t-xl">
         <div className="flex items-center gap-3 min-w-0">
           <Link href={`/profile/${author.username}`} className="shrink-0">
-            <Avatar className="w-10 h-10 ring-2 ring-border/50 hover:ring-brand-medium transition-all duration-200">
+            <Avatar className="w-10 h-10 ring-1 ring-border/20 hover:ring-border/40 transition-all duration-200">
               <AvatarImage src={author.avatarUrl} alt={author.username} />
               <AvatarFallback className="bg-gradient-to-tr from-brand-dark/20 to-brand-medium/20 text-brand-dark font-bold text-sm">
                 {author.first_name?.[0] || author.username?.[0] || '?'}
@@ -108,16 +113,16 @@ export default function PostHeader({ post, onEditClick }: PostHeaderProps) {
           </Link>
           <div className="flex flex-col min-w-0">
             <div className="flex items-center gap-1.5">
-              <Link href={`/profile/${author.username}`} className="text-sm font-bold hover:underline truncate text-foreground">
-                {authorName}
+              <Link href={`/profile/${author.username}`} className="text-[15px] font-bold hover:underline truncate text-foreground">
+                {displayTopName}
               </Link>
               {author.isVerified && (
-                <svg className="w-4 h-4 text-brand-dark dark:text-brand-medium shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                <svg className="w-3.5 h-3.5 text-blue-500 shrink-0" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
                 </svg>
               )}
             </div>
-            <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
+            <div className="flex items-center gap-1 text-[13px] text-muted-foreground mt-0.5">
               <Link href={`/profile/${author.username}`} className="hover:text-foreground transition-colors truncate">
                 @{author.username}
               </Link>

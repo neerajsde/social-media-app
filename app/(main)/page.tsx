@@ -32,7 +32,7 @@ export default function HomePage() {
   const [page, setPage] = useState(1);
   const [posts, setPosts] = useState<Post[]>([]);
   const [composerText, setComposerText] = useState('');
-  const { isAuthenticated, user } = useAppSelector((state) => state.auth);
+  const { isAuthenticated, user, isInitialized } = useAppSelector((state) => state.auth);
 
   const {
     data: feedData,
@@ -40,7 +40,7 @@ export default function HomePage() {
     isFetching,
     isError,
     refetch,
-  } = useGetFeedQuery({ page, limit: FEED_LIMIT, type: activeTab });
+  } = useGetFeedQuery({ page, limit: FEED_LIMIT, type: activeTab }, { skip: !isInitialized });
 
   const [createPost, { isLoading: isPublishing }] = useCreatePostMutation();
 

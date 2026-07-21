@@ -39,6 +39,7 @@ export interface AuthState {
   isAuthenticated: boolean;
   otpToken: string | null;
   otpRequired: boolean;
+  isInitialized: boolean;
 }
 
 export interface LoginRequest {

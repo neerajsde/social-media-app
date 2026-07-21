@@ -145,96 +145,101 @@ export default function PostActions({
 
   return (
     <>
-      <div className="flex flex-col border-t border-border/20">
-        {/* Stats Summary - on top */}
-        {(likeCount > 0 || (post.commentsCount ?? 0) > 0 || repostsCount > 0) && (
-          <div className="flex items-center justify-between px-4 py-3 text-xs font-medium text-muted-foreground border-b border-border/10">
-            <div className="flex items-center gap-1">
-              <span className="text-sm">👍</span>
-              <span className="ml-1 font-semibold text-foreground/80">{formatCount(likeCount)}</span>
-            </div>
-            <div className="flex items-center gap-3">
-              {(post.commentsCount ?? 0) > 0 && (
-                <span className="cursor-pointer hover:text-foreground transition-colors" onClick={onCommentClick}>
-                  {formatCount(post.commentsCount ?? 0)} Comments
-                </span>
+      <div className="flex flex-col border-t border-border/10 pt-2 pb-2">
+        {/* Action Row */}
+        <div className="flex items-center justify-between px-4 py-1">
+          <div className="flex items-center gap-4">
+            {/* Like */}
+            <button
+              type="button"
+              disabled={isActionLoading}
+              onClick={handleLikeClick}
+              className={cn(
+                'transition-colors hover:opacity-70',
+                liked ? 'text-red-500' : 'text-foreground'
               )}
-              {repostsCount > 0 && (
-                <span>
-                  {formatCount(repostsCount)} Shares
-                </span>
+              aria-label={liked ? 'Unlike' : 'Like'}
+            >
+              {isLiking || isDisliking ? (
+                <Loader2 className="w-[26px] h-[26px] animate-spin text-muted-foreground" />
+              ) : (
+                <Heart className={cn('w-[26px] h-[26px] transition-transform duration-200', liked && 'fill-current')} />
               )}
-            </div>
+            </button>
+
+            {/* Comment */}
+            <button
+              type="button"
+              onClick={onCommentClick}
+              className="text-foreground transition-colors hover:opacity-70"
+              aria-label="Comment"
+            >
+              <MessageCircle className="w-[26px] h-[26px]" />
+            </button>
+
+            {/* Repost */}
+            <button
+              type="button"
+              disabled={isActionLoading}
+              onClick={handleRepostToggle}
+              className={cn(
+                'transition-colors hover:opacity-70',
+                reposted ? 'text-green-500' : 'text-foreground'
+              )}
+              aria-label="Repost"
+            >
+              {isReposting ? (
+                <Loader2 className="w-[26px] h-[26px] animate-spin text-muted-foreground" />
+              ) : (
+                <Repeat2 className="w-[26px] h-[26px]" />
+              )}
+            </button>
+
+            {/* Share */}
+            <button
+              type="button"
+              onClick={onShareClick}
+              className="text-foreground transition-colors hover:opacity-70"
+              aria-label="Share"
+            >
+              <Share2 className="w-[26px] h-[26px]" />
+            </button>
+          </div>
+
+          <div className="flex items-center">
+            {/* Bookmark */}
+            <button
+              type="button"
+              disabled={isActionLoading}
+              onClick={handleBookmarkClick}
+              className={cn(
+                'transition-colors hover:opacity-70',
+                bookmarked ? 'text-foreground' : 'text-foreground'
+              )}
+              aria-label={bookmarked ? 'Remove bookmark' : 'Bookmark'}
+            >
+              {isBookmarking ? (
+                <Loader2 className="w-[26px] h-[26px] animate-spin text-muted-foreground" />
+              ) : (
+                <Bookmark className={cn('w-[26px] h-[26px]', bookmarked && 'fill-current')} />
+              )}
+            </button>
+          </div>
+        </div>
+
+        {/* Stats Summary - likes count below actions */}
+        {(likeCount > 0 || repostsCount > 0) && (
+          <div className="px-4 mt-1.5 flex flex-col gap-1 text-sm">
+            {likeCount > 0 && (
+              <span className="font-semibold text-foreground">
+                {formatCount(likeCount)} {likeCount === 1 ? 'like' : 'likes'}
+              </span>
+            )}
           </div>
         )}
-
-        {/* Action Row - at bottom */}
-        <div className="flex items-center justify-between px-2 py-1">
-          {/* Like */}
-          <Button
-            type="button"
-            variant="ghost"
-            disabled={isActionLoading}
-            onClick={handleLikeClick}
-            className={cn(
-              'flex-1 flex gap-2 items-center justify-center rounded-lg py-2 hover:bg-white/5 transition-colors',
-              liked ? 'text-red-500 hover:text-red-600' : 'text-muted-foreground hover:text-foreground'
-            )}
-            aria-label={liked ? 'Unlike' : 'Like'}
-          >
-            {isLiking || isDisliking ? (
-              <Loader2 className="w-5 h-5 animate-spin" />
-            ) : (
-              <Heart className={cn('w-5 h-5 transition-transform duration-200', liked && 'fill-current')} />
-            )}
-            <span className="hidden sm:inline font-semibold">Like</span>
-          </Button>
-
-          {/* Comment */}
-          <Button
-            type="button"
-            variant="ghost"
-            onClick={onCommentClick}
-            className="flex-1 flex gap-2 items-center justify-center rounded-lg py-2 text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors"
-            aria-label="Comment"
-          >
-            <MessageCircle className="w-5 h-5" />
-            <span className="hidden sm:inline font-semibold">Comment</span>
-          </Button>
-
-          {/* Share */}
-          <Button
-            type="button"
-            variant="ghost"
-            onClick={onShareClick}
-            className="flex-1 flex gap-2 items-center justify-center rounded-lg py-2 text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors"
-            aria-label="Share"
-          >
-            <Share2 className="w-5 h-5" />
-            <span className="hidden sm:inline font-semibold">Share</span>
-          </Button>
-
-          {/* Bookmark */}
-          <Button
-            type="button"
-            variant="ghost"
-            disabled={isActionLoading}
-            onClick={handleBookmarkClick}
-            className={cn(
-              'flex-1 flex gap-2 items-center justify-center rounded-lg py-2 hover:bg-white/5 transition-colors',
-              bookmarked ? 'text-brand-dark dark:text-brand-medium' : 'text-muted-foreground hover:text-foreground'
-            )}
-            aria-label={bookmarked ? 'Remove bookmark' : 'Bookmark'}
-          >
-            {isBookmarking ? (
-              <Loader2 className="w-5 h-5 animate-spin" />
-            ) : (
-              <Bookmark className={cn('w-5 h-5', bookmarked && 'fill-current')} />
-            )}
-            <span className="hidden sm:inline font-semibold">Save</span>
-          </Button>
-        </div>
       </div>
+
+
 
       <LoginRequiredDialog open={showAuthDialog} onOpenChange={setShowAuthDialog} />
     </>
