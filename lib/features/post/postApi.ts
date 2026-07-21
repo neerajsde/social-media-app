@@ -84,6 +84,14 @@ export const postApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ['Comments'],
     }),
+    editComment: builder.mutation<{ success: boolean }, { commentId: string; content: string }>({
+      query: (body) => ({
+        url: '/post/comment',
+        method: 'PUT',
+        body,
+      }),
+      invalidatesTags: ['Comments'],
+    }),
     deleteComment: builder.mutation<{ success: boolean }, { postId: string; commentId: string }>({
       query: ({ postId, commentId }) => ({
         url: `/post/comment/${postId}/${commentId}`,
@@ -96,6 +104,7 @@ export const postApi = baseApi.injectEndpoints({
         url: `/post/like-unlike-comment/${commentId}/${postId}`,
         method: 'POST',
       }),
+      invalidatesTags: ['Comments'],
     }),
     repost: builder.mutation<{ success: boolean; message: string }, { postId: string; content?: string; visibility: string }>({
       query: (body) => ({
@@ -104,6 +113,12 @@ export const postApi = baseApi.injectEndpoints({
         body,
       }),
       invalidatesTags: ['Feed'],
+    }),
+    sharePostInApp: builder.mutation<{ success: boolean }, { postId: string; receiverId: string }>({
+      query: ({ postId, receiverId }) => ({
+        url: `/post/share-post-in-app/${postId}/${receiverId}`,
+        method: 'POST',
+      }),
     }),
     sharePostExternally: builder.mutation<{ success: boolean; message: string }, string>({
       query: (postId) => ({
@@ -135,9 +150,11 @@ export const {
   useBookmarkPostMutation,
   useCommentOnPostMutation,
   useReplyToCommentMutation,
+  useEditCommentMutation,
   useDeleteCommentMutation,
   useLikeCommentMutation,
   useRepostMutation,
+  useSharePostInAppMutation,
   useSharePostExternallyMutation,
   useGeneratePostPresignedUrlMutation,
 } = postApi;
