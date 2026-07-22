@@ -11,6 +11,9 @@ export const userApi = baseApi.injectEndpoints({
       query: (username) => `/user/profile/${username}`,
       providesTags: (result, error, username) => [{ type: 'Profile', id: username }],
     }),
+    getSuggestedUsers: builder.query<{ success: boolean; users: User[] }, { limit?: number }>({
+      query: ({ limit = 4 }) => `/user/suggested?limit=${limit}`,
+    }),
     updateProfile: builder.mutation<{ success: boolean; message: string; data: any }, any>({
       query: (body) => ({
         url: '/user/profile',
@@ -89,6 +92,7 @@ export const userApi = baseApi.injectEndpoints({
 export const {
   useGetProfileQuery,
   useGetUserProfileByUsernameQuery,
+  useGetSuggestedUsersQuery,
   useUpdateProfileMutation,
   useUpdateAvatarMutation,
   useUpdateBannerMutation,

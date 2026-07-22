@@ -15,12 +15,16 @@ import {
   Loader2,
   RefreshCw,
   Users,
+  MessageCircle,
+  Bell,
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { useAppSelector } from '@/lib/hooks';
 import { toast } from 'sonner';
 import { useGetFeedQuery, useCreatePostMutation } from '@/lib/features/post/postApi';
+import { useGetUnreadCountQuery as useGetNotificationsUnreadCountQuery } from '@/lib/features/notification/notificationApi';
+import { useGetUnreadCountQuery as useGetChatUnreadCountQuery } from '@/lib/features/chat/chatApi';
 import { normalizeFeedPost } from '@/lib/post-utils';
 import type { FeedType, Post } from '@/lib/types';
 
@@ -43,6 +47,12 @@ export default function HomePage() {
   } = useGetFeedQuery({ page, limit: FEED_LIMIT, type: activeTab }, { skip: !isInitialized });
 
   const [createPost, { isLoading: isPublishing }] = useCreatePostMutation();
+
+  const { data: notificationData } = useGetNotificationsUnreadCountQuery(undefined, { skip: !isAuthenticated, pollingInterval: 30000 });
+  const { data: chatData } = useGetChatUnreadCountQuery(undefined, { skip: !isAuthenticated, pollingInterval: 30000 });
+  
+  const unreadCount = notificationData?.count || 0;
+  const chatUnreadCount = chatData?.count || 0;
 
   useEffect(() => {
     setPage(1);
@@ -110,11 +120,33 @@ export default function HomePage() {
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto border-x border-border/40 min-h-screen">
+    <div className="w-full max-w-2xl border-r border-border/40 min-h-screen">
       {/* Header */}
       <div className="sticky top-0 z-20 bg-background/85 backdrop-blur-xl">
-        <div className="px-3 sm:px-4 py-3">
+        <div className="px-3 sm:px-4 py-3 flex items-center justify-between">
           <h1 className="text-base sm:text-lg font-bold font-heading tracking-tight">Home</h1>
+          <div className="flex items-center gap-1.5 md:hidden">
+            {isAuthenticated && (
+              <>
+                <Link href="/notifications">
+                  <Button variant="ghost" size="icon" className="w-8 h-8 rounded-full relative hover:bg-accent/60">
+                    <Bell className="w-5 h-5 text-foreground/80" />
+                    {unreadCount > 0 && (
+                      <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-destructive rounded-full border-2 border-background" />
+                    )}
+                  </Button>
+                </Link>
+                <Link href="/messages">
+                  <Button variant="ghost" size="icon" className="w-8 h-8 rounded-full relative hover:bg-accent/60">
+                    <MessageCircle className="w-5 h-5 text-foreground/80" />
+                    {chatUnreadCount > 0 && (
+                      <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-brand-dark dark:bg-brand-medium rounded-full border-2 border-background" />
+                    )}
+                  </Button>
+                </Link>
+              </>
+            )}
+          </div>
         </div>
         <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full tab-line">
           <TabsList className="w-full bg-transparent justify-stretch rounded-none border-b border-border/60 p-0 h-auto gap-0">

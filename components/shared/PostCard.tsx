@@ -16,6 +16,8 @@ import LoginRequiredDialog from './LoginRequiredDialog';
 import CommentInput from './CommentInput';
 import { useRouter } from 'next/navigation';
 import PostCommentsSheet from './PostCommentsSheet';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface PostCardProps {
   post: Post;
@@ -135,9 +137,28 @@ export default function PostCard({ post, showMedia = true }: PostCardProps) {
   const hasMedia = (post.images && post.images.length > 0) || post.video || post.mediaUrl || post.thumbnailUrl;
   const actuallyShowMedia = showMedia && hasMedia;
 
+  const handleCardClick = (e: React.MouseEvent) => {
+    const target = e.target as HTMLElement;
+    
+    // Prevent navigation if clicking interactive elements (buttons, links, dialogs)
+    if (
+      target.closest('button') ||
+      target.closest('a') ||
+      target.tagName === 'A' ||
+      target.closest('[role="dialog"]')
+    ) {
+      return;
+    }
+    
+    router.push(`/post/${post.id}`);
+  };
+
   return (
     <>
-      <Card className="border-border/20 shadow-sm hover:shadow-md transition-all duration-300 bg-card rounded-2xl overflow-hidden">
+      <Card 
+        onClick={handleCardClick}
+        className="border-border/20 shadow-sm hover:shadow-md transition-all duration-300 bg-card rounded-2xl overflow-hidden cursor-pointer"
+      >
         <CardContent className="p-0">
           {/* Header */}
           <PostHeader post={post} />
@@ -146,11 +167,17 @@ export default function PostCard({ post, showMedia = true }: PostCardProps) {
           {!actuallyShowMedia && (
             <div className="px-4 py-3 space-y-2">
               {post.content && (
-                <Link href={`/post/${post.id}`}>
-                  <p className="text-[15px] sm:text-base leading-relaxed text-foreground whitespace-pre-wrap break-words">
+                <div className="text-[15px] sm:text-base leading-relaxed text-foreground break-words">
+                  <ReactMarkdown 
+                    remarkPlugins={[remarkGfm]}
+                    components={{
+                      a: ({node, ...props}) => <a className="text-brand-dark dark:text-brand-medium hover:underline font-medium" {...props} />,
+                      p: ({node, ...props}) => <p className="whitespace-pre-wrap mb-2 last:mb-0" {...props} />
+                    }}
+                  >
                     {post.content}
-                  </p>
-                </Link>
+                  </ReactMarkdown>
+                </div>
               )}
 
               {post.tags && post.tags.length > 0 && (
@@ -190,14 +217,20 @@ export default function PostCard({ post, showMedia = true }: PostCardProps) {
           {actuallyShowMedia && (
             <div className="px-4 pb-2 space-y-1 mt-1">
               {post.content && (
-                <Link href={`/post/${post.id}`}>
-                  <p className="text-[14px] leading-relaxed text-foreground whitespace-pre-wrap break-words">
-                    <span className="font-semibold mr-1.5 hover:underline cursor-pointer">
-                      {post.author?.username || post.user?.username || 'anonymous'}
-                    </span>
+                <div className="text-[14px] leading-relaxed text-foreground break-words">
+                  <span className="font-semibold mr-1.5 hover:underline cursor-pointer">
+                    {post.author?.username || post.user?.username || 'anonymous'}
+                  </span>
+                  <ReactMarkdown 
+                    remarkPlugins={[remarkGfm]}
+                    components={{
+                      a: ({node, ...props}) => <a className="text-brand-dark dark:text-brand-medium hover:underline font-medium" {...props} />,
+                      p: ({node, ...props}) => <span className="whitespace-pre-wrap" {...props} />
+                    }}
+                  >
                     {post.content}
-                  </p>
-                </Link>
+                  </ReactMarkdown>
+                </div>
               )}
 
               {post.tags && post.tags.length > 0 && (

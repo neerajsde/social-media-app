@@ -12,6 +12,13 @@ export const postApi = baseApi.injectEndpoints({
       query: ({ userId, page = 1, limit = 20 }) => `/post/user/${userId}?page=${page}&limit=${limit}`,
       providesTags: (result, error, { userId }) => ['Feed', { type: 'Feed', id: `User-${userId}` }],
     }),
+    getBookmarkedPosts: builder.query<{ success: boolean; posts: Post[]; meta: any }, { page?: number; limit?: number }>({
+      query: ({ page = 1, limit = 20 }) => `/post/bookmarks?page=${page}&limit=${limit}`,
+      providesTags: ['Post', { type: 'Post', id: 'LIST_BOOKMARKS' }],
+    }),
+    getTrendingTags: builder.query<{ success: boolean; tags: { tag: string; postCount: number }[] }, { limit?: number }>({
+      query: ({ limit = 5 }) => `/post/trending-tags?limit=${limit}`,
+    }),
     getPost: builder.query<{ success: boolean; data: Post }, string>({
       query: (postId) => `/post/${postId}`,
       providesTags: (_result, _err, id) => [{ type: 'Post', id }],
@@ -66,7 +73,7 @@ export const postApi = baseApi.injectEndpoints({
         url: `/post/bookmark/${postId}`,
         method: 'POST',
       }),
-      invalidatesTags: (_result, _err, id) => [{ type: 'Post', id }],
+      invalidatesTags: (_result, _err, id) => [{ type: 'Post', id }, { type: 'Post', id: 'LIST_BOOKMARKS' }],
     }),
     commentOnPost: builder.mutation<{ success: boolean }, { postId: string; content: string; imageKey?: string }>({
       query: (body) => ({
@@ -139,6 +146,8 @@ export const postApi = baseApi.injectEndpoints({
 export const {
   useGetFeedQuery,
   useGetUserPostsQuery,
+  useGetBookmarkedPostsQuery,
+  useGetTrendingTagsQuery,
   useGetPostQuery,
   useGetPostCommentsQuery,
   useGetCommentRepliesQuery,
