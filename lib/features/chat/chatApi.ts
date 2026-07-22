@@ -18,6 +18,17 @@ export const chatApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ['Chat'],
     }),
+    getUnreadCount: builder.query<{ success: boolean; count: number }, void>({
+      query: () => '/chat/unread-count',
+      providesTags: ['Chat'],
+    }),
+    markConversationAsRead: builder.mutation<{ success: boolean; count: number }, string>({
+      query: (conversationId) => ({
+        url: `/chat/${conversationId}/read`,
+        method: 'PUT',
+      }),
+      invalidatesTags: ['Chat'],
+    }),
   }),
 });
 
@@ -25,4 +36,6 @@ export const {
   useGetConversationsQuery,
   useGetMessagesQuery,
   useSendMessageMutation,
+  useGetUnreadCountQuery,
+  useMarkConversationAsReadMutation,
 } = chatApi;

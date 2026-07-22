@@ -9,7 +9,8 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import SharedPostCard from '@/components/shared/SharedPostCard';
-import { useGetConversationsQuery, useGetMessagesQuery, useSendMessageMutation } from '@/lib/features/chat/chatApi';
+import { useGetConversationsQuery, useGetMessagesQuery, useSendMessageMutation, useMarkConversationAsReadMutation } from '@/lib/features/chat/chatApi';
+import { useSearchQuery } from '@/lib/features/search/searchApi';
 import { useSelector } from 'react-redux';
 import type { RootState } from '@/lib/store';
 import { toast } from 'sonner';
@@ -19,6 +20,11 @@ export default function MessagesPage() {
   const [activeConv, setActiveConv] = useState<any>(null);
   const [inputText, setInputText] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+
+  const { data: searchData, isFetching: isSearching } = useSearchQuery(
+    { q: searchQuery, type: 'account' },
+    { skip: searchQuery.length < 2 }
+  );
 
   const { data: conversationsData, isLoading: convsLoading } = useGetConversationsQuery(undefined, {
     pollingInterval: 10000, // Poll every 10s for new messages/conversations
@@ -30,6 +36,7 @@ export default function MessagesPage() {
   });
 
   const [sendMessage, { isLoading: isSending }] = useSendMessageMutation();
+  const [markAsRead] = useMarkConversationAsReadMutation();
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const conversations = conversationsData?.data || [];
@@ -40,6 +47,24 @@ export default function MessagesPage() {
       scrollRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [messages]);
+
+  useEffect(() => {
+    if (!activeConv?.id) return;
+    
+    // Check if there are unread messages from the other participant
+    const hasUnread = messages.some((m: any) => !m.isRead && m.senderId !== currentUser?.id);
+    
+    if (hasUnread || activeConv.unreadCount > 0) {
+      markAsRead(activeConv.id)
+        .unwrap()
+        .then(() => {
+          if (activeConv.unreadCount > 0) {
+            setActiveConv({ ...activeConv, unreadCount: 0 });
+          }
+        })
+        .catch(console.error);
+    }
+  }, [messages, activeConv, currentUser?.id, markAsRead]);
 
   const participant = activeConv
     ? activeConv.participants.find((p: any) => p.id !== currentUser?.id) || activeConv.participants[0]
@@ -68,6 +93,24 @@ export default function MessagesPage() {
       (peer.first_name || '').toLowerCase().includes(searchQuery.toLowerCase())
     );
   });
+
+  const searchResults = (searchData?.data as any[]) || [];
+  const globalUsers = searchResults.filter(
+    (user) =>
+      user.id !== currentUser?.id &&
+      !conversations.some((c: any) => c.participants.some((p: any) => p.id === user.id))
+  );
+
+  const startNewConversation = (user: any) => {
+    const newConv = {
+      id: `new-${user.id}`,
+      participants: [user, currentUser],
+      messages: [],
+      unreadCount: 0,
+    };
+    setActiveConv(newConv);
+    setSearchQuery('');
+  };
 
   return (
     <div className="w-full max-w-4xl h-[calc(100vh-64px)] md:h-screen flex flex-col md:flex-row border-r border-border bg-card/10">
@@ -119,12 +162,18 @@ export default function MessagesPage() {
                         )}
                       >
                         <Avatar className="w-10 h-10 border border-border">
-                          <AvatarImage src={peer?.avatarUrl} alt={peer?.username} />
-                          <AvatarFallback className="bg-brand-medium/20 text-brand-dark text-xs">{peer?.first_name?.[0]}</AvatarFallback>
+                          <AvatarImage src={peer?.avatarUrl} alt={peer?.username || 'User'} />
+                          <AvatarFallback className="bg-brand-medium/20 text-brand-dark text-xs uppercase">
+                            {peer?.first_name?.[0] || peer?.username?.[0] || '?'}
+                          </AvatarFallback>
                         </Avatar>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between">
-                            <span className="font-semibold text-sm truncate">{peer?.first_name} {peer?.last_name}</span>
+                            <span className="font-semibold text-sm truncate">
+                              {peer?.first_name || peer?.last_name 
+                                ? `${peer.first_name || ''} ${peer.last_name || ''}`.trim() 
+                                : peer?.username || 'Unknown User'}
+                            </span>
                             {conv.lastMessage && (
                               <span className="text-[10px] text-muted-foreground whitespace-nowrap">
                                 {new Date(conv.lastMessage.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -141,6 +190,47 @@ export default function MessagesPage() {
                       </button>
                     );
                   })
+                )}
+
+                {/* Global Search Results */}
+                {searchQuery.length >= 2 && (
+                  <div className="mt-4 border-t border-border pt-4">
+                    <h3 className="text-xs font-semibold text-muted-foreground mb-2 px-2 uppercase tracking-wider">
+                      Global Search
+                    </h3>
+                    {isSearching ? (
+                      <div className="flex justify-center py-4">
+                        <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+                      </div>
+                    ) : globalUsers.length === 0 ? (
+                      <p className="text-xs text-center text-muted-foreground py-2">No other users found.</p>
+                    ) : (
+                      globalUsers.map((user: any) => {
+                        const userName = user.first_name || user.last_name 
+                          ? `${user.first_name || ''} ${user.last_name || ''}`.trim() 
+                          : user.username;
+                          
+                        return (
+                          <button
+                            key={user.id}
+                            onClick={() => startNewConversation(user)}
+                            className="w-full flex items-center gap-3 p-3 rounded-xl text-left transition-colors hover:bg-accent/60"
+                          >
+                            <Avatar className="w-10 h-10 border border-border">
+                              <AvatarImage src={user.avatarUrl} alt={user.username || 'User'} />
+                              <AvatarFallback className="bg-brand-medium/20 text-brand-dark text-xs uppercase">
+                                {user.first_name?.[0] || user.username?.[0] || '?'}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1 min-w-0">
+                              <div className="font-semibold text-sm truncate">{userName}</div>
+                              <p className="text-xs text-muted-foreground truncate mt-0.5">@{user.username}</p>
+                            </div>
+                          </button>
+                        );
+                      })
+                    )}
+                  </div>
                 )}
               </div>
             )}
@@ -159,12 +249,18 @@ export default function MessagesPage() {
                   <ArrowLeft className="w-4 h-4" />
                 </Button>
                 <Avatar className="w-9 h-9 border border-border">
-                  <AvatarImage src={participant.avatarUrl} alt={participant.username} />
-                  <AvatarFallback className="bg-brand-medium/20 text-brand-dark text-sm">{participant.first_name?.[0]}</AvatarFallback>
+                  <AvatarImage src={participant.avatarUrl} alt={participant.username || 'User'} />
+                  <AvatarFallback className="bg-brand-medium/20 text-brand-dark text-sm uppercase">
+                    {participant.first_name?.[0] || participant.username?.[0] || '?'}
+                  </AvatarFallback>
                 </Avatar>
                 <div>
-                  <h2 className="text-sm font-semibold leading-none">{participant.first_name} {participant.last_name}</h2>
-                  <p className="text-xs text-muted-foreground mt-1">@{participant.username}</p>
+                  <h2 className="text-sm font-semibold leading-none">
+                    {participant.first_name || participant.last_name 
+                      ? `${participant.first_name || ''} ${participant.last_name || ''}`.trim() 
+                      : participant.username || 'Unknown User'}
+                  </h2>
+                  <p className="text-xs text-muted-foreground mt-1">@{participant.username || 'unknown'}</p>
                 </div>
               </div>
               <div className="flex items-center gap-1.5">

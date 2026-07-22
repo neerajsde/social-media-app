@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, MessageCircle, Eye, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 import { useAppSelector } from '@/lib/hooks';
 import type { Post, Comment } from '@/lib/types';
@@ -168,9 +170,17 @@ export default function SinglePostView({ post }: SinglePostViewProps) {
           {/* Caption & tags */}
           <div className="px-4 pb-3 space-y-2">
             {post.content && (
-              <p className="text-sm leading-relaxed text-foreground/95 break-words whitespace-pre-wrap">
-                {post.content}
-              </p>
+              <div className="text-sm sm:text-base leading-relaxed text-foreground/95 break-words">
+                <ReactMarkdown 
+                  remarkPlugins={[remarkGfm]}
+                  components={{
+                    a: ({node, ...props}) => <a className="text-brand-dark dark:text-brand-medium hover:underline font-medium" {...props} />,
+                    p: ({node, ...props}) => <p className="whitespace-pre-wrap mb-2 last:mb-0" {...props} />
+                  }}
+                >
+                  {post.content}
+                </ReactMarkdown>
+              </div>
             )}
             {post.tags && post.tags.length > 0 && (
               <div className="flex flex-wrap gap-1.5 pt-1">

@@ -17,6 +17,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { logout } from '@/lib/features/auth/authSlice';
 import { toggleSidebar } from '@/lib/features/ui/uiSlice';
 import { toast } from 'sonner';
+import { useGetUnreadCountQuery as useGetNotificationsUnreadCountQuery } from '@/lib/features/notification/notificationApi';
+import { useGetUnreadCountQuery as useGetChatUnreadCountQuery } from '@/lib/features/chat/chatApi';
 
 const navItems = [
   { href: '/', icon: Home, label: 'Home' },
@@ -37,6 +39,12 @@ export default function Sidebar() {
   const { isAuthenticated, user } = useAppSelector((state) => state.auth);
   
   const isCollapsed = useAppSelector((state) => state.ui.isSidebarCollapsed);
+  
+  const { data: notificationData } = useGetNotificationsUnreadCountQuery(undefined, { skip: !isAuthenticated, pollingInterval: 30000 });
+  const { data: chatData } = useGetChatUnreadCountQuery(undefined, { skip: !isAuthenticated, pollingInterval: 30000 });
+  
+  const unreadCount = notificationData?.count || 0;
+  const chatUnreadCount = chatData?.count || 0;
 
   return (
     <TooltipProvider delay={0}>
@@ -54,7 +62,7 @@ export default function Sidebar() {
           </Link>
 
           <Tooltip>
-            <TooltipTrigger asChild>
+            <TooltipTrigger render={
               <Button
                 variant="ghost"
                 size="icon"
@@ -68,7 +76,7 @@ export default function Sidebar() {
               >
                 {isCollapsed ? <PanelLeftOpen className="w-5 h-5" /> : <PanelLeftClose className="w-5 h-5" />}
               </Button>
-            </TooltipTrigger>
+            } />
             <TooltipContent side="right" className="font-medium">
               {isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
             </TooltipContent>
@@ -101,7 +109,28 @@ export default function Sidebar() {
                     'w-5 h-5 shrink-0 transition-transform duration-200 group-hover:scale-110',
                     isActive ? 'text-brand-dark dark:text-brand-medium' : ''
                   )} />
-                  <span className={cn("truncate transition-all duration-300", isCollapsed ? "hidden" : "hidden xl:block")}>{label}</span>
+                  <span className={cn("truncate transition-all duration-300 flex-1", isCollapsed ? "hidden" : "hidden xl:block")}>
+                    {label}
+                  </span>
+                  
+                  {href === '/notifications' && unreadCount > 0 && !isCollapsed && (
+                    <span className="hidden xl:flex ml-auto items-center justify-center min-w-[20px] h-5 px-1.5 text-[11px] font-bold text-white bg-destructive rounded-full">
+                      {unreadCount > 99 ? '99+' : unreadCount}
+                    </span>
+                  )}
+                  {href === '/notifications' && unreadCount > 0 && isCollapsed && (
+                    <span className="absolute top-1 right-2 w-2.5 h-2.5 bg-destructive rounded-full border-2 border-background" />
+                  )}
+                  
+                  {href === '/messages' && chatUnreadCount > 0 && !isCollapsed && (
+                    <span className="hidden xl:flex ml-auto items-center justify-center min-w-[20px] h-5 px-1.5 text-[11px] font-bold text-white bg-brand-dark dark:bg-brand-medium rounded-full">
+                      {chatUnreadCount > 99 ? '99+' : chatUnreadCount}
+                    </span>
+                  )}
+                  {href === '/messages' && chatUnreadCount > 0 && isCollapsed && (
+                    <span className="absolute top-1 right-2 w-2.5 h-2.5 bg-brand-dark dark:bg-brand-medium rounded-full border-2 border-background" />
+                  )}
+
                 </TooltipTrigger>
                 <TooltipContent side="right" className={cn("font-medium", !isCollapsed && "xl:hidden")}>
                   {label}

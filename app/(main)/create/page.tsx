@@ -13,6 +13,10 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
 import { useCreatePostMutation, useGeneratePostPresignedUrlMutation } from '@/lib/features/post/postApi';
+import { useLazySearchQuery } from '@/lib/features/search/searchApi';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 export default function CreatePostPage() {
   const router = useRouter();
@@ -23,6 +27,14 @@ export default function CreatePostPage() {
   const [visibility, setVisibility] = useState<'public' | 'private' | 'followers'>('public');
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState('');
+
+  // Markdown and Mentions state
+  const [isPreviewMode, setIsPreviewMode] = useState(false);
+  const [mentionQuery, setMentionQuery] = useState<string | null>(null);
+  const [mentionIndex, setMentionIndex] = useState<{ start: number, end: number } | null>(null);
+  const [mentionResults, setMentionResults] = useState<any[]>([]);
+  
+  const [searchTrigger] = useLazySearchQuery();
 
   // Handle type param initialization from url
   useEffect(() => {
@@ -233,19 +245,109 @@ export default function CreatePostPage() {
           </div>
 
           {/* Core editor text */}
-          <div className="space-y-2">
-            <Label htmlFor="post-content" className="sr-only">Caption / Post Content</Label>
-            <Textarea
-              id="post-content"
-              placeholder={
-                postType === 'text'
-                  ? 'What is on your mind? Share updates, technical insights...'
-                  : 'Add a premium caption to your post...'
-              }
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              className="min-h-[140px] resize-none border-none p-0 focus-visible:ring-0 text-base placeholder:text-muted-foreground bg-transparent font-sans"
-            />
+          <div className="space-y-2 relative">
+            <div className="flex justify-between items-center mb-1">
+              <Label htmlFor="post-content" className="sr-only">Caption / Post Content</Label>
+              <div className="flex bg-muted/60 rounded-md p-0.5 ml-auto">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className={`h-7 px-3 text-xs rounded-sm ${!isPreviewMode ? 'bg-background shadow-sm' : ''}`}
+                  onClick={() => setIsPreviewMode(false)}
+                >
+                  Write
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className={`h-7 px-3 text-xs rounded-sm ${isPreviewMode ? 'bg-background shadow-sm' : ''}`}
+                  onClick={() => setIsPreviewMode(true)}
+                >
+                  Preview
+                </Button>
+              </div>
+            </div>
+
+            {isPreviewMode ? (
+              <div className="min-h-[140px] p-4 bg-muted/20 rounded-md border border-border/50 prose prose-sm dark:prose-invert max-w-none">
+                {content ? (
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
+                ) : (
+                  <span className="text-muted-foreground italic">Nothing to preview</span>
+                )}
+              </div>
+            ) : (
+              <Textarea
+                id="post-content"
+                placeholder={
+                  postType === 'text'
+                    ? 'What is on your mind? Share updates, technical insights... (Markdown supported, type @ to mention)'
+                    : 'Add a premium caption to your post... (Markdown supported, type @ to mention)'
+                }
+                value={content}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setContent(val);
+                  
+                  // Mention detection logic
+                  const cursorPosition = e.target.selectionStart;
+                  const textBeforeCursor = val.slice(0, cursorPosition);
+                  const match = textBeforeCursor.match(/@([a-zA-Z0-9_]*)$/);
+                  
+                  if (match) {
+                    const query = match[1];
+                    setMentionQuery(query);
+                    setMentionIndex({ start: cursorPosition - query.length - 1, end: cursorPosition });
+                    
+                    searchTrigger({ q: query, type: 'account', limit: 5 }).unwrap()
+                      .then((res) => {
+                        if (res.success && res.data) {
+                          setMentionResults(res.data);
+                        }
+                      })
+                      .catch((err) => console.error("Mention search failed", err));
+                  } else {
+                    setMentionQuery(null);
+                    setMentionResults([]);
+                  }
+                }}
+                className="min-h-[140px] resize-none border-none p-0 focus-visible:ring-0 text-base placeholder:text-muted-foreground bg-transparent font-sans"
+              />
+            )}
+            
+            {/* Mention Dropdown */}
+            {mentionQuery !== null && mentionResults.length > 0 && !isPreviewMode && (
+              <div className="absolute z-50 mt-1 w-64 bg-background border border-border/60 rounded-xl shadow-xl overflow-hidden backdrop-blur-xl bottom-full mb-2 left-0">
+                <div className="p-2 text-xs font-semibold text-muted-foreground bg-muted/30">Mentions</div>
+                <div className="max-h-[200px] overflow-y-auto">
+                  {mentionResults.map((user: any) => (
+                    <div 
+                      key={user.id} 
+                      className="flex items-center gap-3 p-2 hover:bg-muted/50 cursor-pointer transition-colors"
+                      onClick={() => {
+                        if (mentionIndex) {
+                          const newText = content.substring(0, mentionIndex.start) + 
+                            `[@${user.username}](/profile/${user.username}) ` + 
+                            content.substring(mentionIndex.end);
+                          setContent(newText);
+                          setMentionQuery(null);
+                          setMentionResults([]);
+                        }
+                      }}
+                    >
+                      <Avatar className="w-8 h-8">
+                        <AvatarImage src={user.avatarUrl} />
+                        <AvatarFallback className="text-xs bg-brand-medium/20">{user.username[0].toUpperCase()}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex flex-col">
+                        <span className="text-sm font-semibold">{user.first_name} {user.last_name}</span>
+                        <span className="text-xs text-muted-foreground">@{user.username}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Hidden File Input */}

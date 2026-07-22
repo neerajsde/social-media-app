@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 import { useAppDispatch } from '@/lib/hooks';
 import { toggleSidebar } from '@/lib/features/ui/uiSlice';
 import { Button } from '@/components/ui/button';
+import { NotificationCenter } from '@/components/NotificationCenter';
 
 export default function TopNav() {
   const pathname = usePathname();
@@ -48,7 +49,8 @@ export default function TopNav() {
         <Menu className="w-5 h-5" />
       </Button>
       <Icon className="w-5 h-5 text-brand-dark dark:text-brand-medium" />
-      <h1 className="text-lg font-bold">{title}</h1>
+      <h1 className="text-lg font-bold flex-1">{title}</h1>
+      <NotificationCenter />
     </div>
   );
 }
