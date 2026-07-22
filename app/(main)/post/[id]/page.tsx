@@ -15,7 +15,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
   const post = data?.data ? normalizeFeedPost(data.data as unknown as Record<string, unknown>) : undefined;
 
   return (
-    <div className="w-full min-h-screen bg-background">
+    <div className="w-full max-w-2xl border-x border-border/40 min-h-screen">
       {/* Navigation Header for Desktop */}
       <div className="hidden md:flex sticky top-0 z-20 items-center gap-3 border-b border-border bg-background/80 px-4 py-3 backdrop-blur-xl">
         <Link href="/" aria-label="Back to feed">

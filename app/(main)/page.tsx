@@ -17,6 +17,7 @@ import {
   Users,
   MessageCircle,
   Bell,
+  Home,
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -120,27 +121,35 @@ export default function HomePage() {
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto min-h-screen">
-      {/* Header */}
-      <div className="sticky top-0 z-20 bg-background/85 backdrop-blur-xl">
-        <div className="px-3 sm:px-4 py-3 flex items-center justify-between">
-          <h1 className="text-base sm:text-lg font-bold font-heading tracking-tight">Home</h1>
+    <div className="w-full max-w-2xl border-x border-white/5 bg-[#111111] min-h-screen">
+      {/* Premium Interactive Header */}
+      <div 
+        className="sticky top-0 z-20 bg-[#111111]/80 backdrop-blur-2xl border-b border-white/5 cursor-pointer hover:bg-[#111111]/90 transition-all duration-300 group/header"
+        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+      >
+        <div className="px-4 py-3 sm:py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-full bg-white/5 group-hover/header:bg-white/10 flex items-center justify-center transition-colors">
+              <Home className="w-4.5 h-4.5 text-white/90" />
+            </div>
+            <h1 className="text-lg sm:text-xl font-bold font-heading tracking-tight text-white/90">Home</h1>
+          </div>
           <div className="flex items-center gap-1.5 md:hidden">
             {isAuthenticated && (
               <>
                 <Link href="/notifications">
-                  <Button variant="ghost" size="icon" className="w-8 h-8 rounded-full relative hover:bg-accent/60">
-                    <Bell className="w-5 h-5 text-foreground/80" />
+                  <Button variant="ghost" size="icon" className="w-9 h-9 rounded-full relative hover:bg-white/10">
+                    <Bell className="w-5 h-5 text-white/80" />
                     {unreadCount > 0 && (
-                      <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-destructive rounded-full border-2 border-background" />
+                      <span className="absolute top-1 right-1 w-2 h-2 bg-[#f31260] rounded-full border border-[#111111]" />
                     )}
                   </Button>
                 </Link>
                 <Link href="/messages">
-                  <Button variant="ghost" size="icon" className="w-8 h-8 rounded-full relative hover:bg-accent/60">
-                    <MessageCircle className="w-5 h-5 text-foreground/80" />
+                  <Button variant="ghost" size="icon" className="w-9 h-9 rounded-full relative hover:bg-white/10">
+                    <MessageCircle className="w-5 h-5 text-white/80" />
                     {chatUnreadCount > 0 && (
-                      <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-brand-dark dark:bg-brand-medium rounded-full border-2 border-background" />
+                      <span className="absolute top-1 right-1 w-2 h-2 bg-brand-medium rounded-full border border-[#111111]" />
                     )}
                   </Button>
                 </Link>

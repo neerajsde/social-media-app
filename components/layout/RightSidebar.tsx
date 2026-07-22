@@ -45,7 +45,7 @@ export default function RightSidebar() {
 
   return (
     <>
-      <aside className="hidden lg:flex flex-col w-[300px] xl:w-[340px] shrink-0 sticky top-0 h-screen overflow-y-auto border-l border-border/40 bg-[#1a1a1a]">
+      <aside className="hidden lg:flex flex-col w-[248px] shrink-0 sticky top-0 h-screen overflow-y-auto border-l border-border/40 bg-[#1a1a1a]">
         {/* Inner content with padding */}
         <div className="flex flex-col gap-0 flex-1">
 

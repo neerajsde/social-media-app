@@ -346,7 +346,7 @@ export default function SettingsPage() {
   const sessions = sessionsData?.sessions ?? [];
 
   return (
-    <div className="w-full max-w-4xl p-4 md:p-6 space-y-6 pb-20 border-r border-border/40 min-h-screen">
+    <div className="w-full max-w-2xl p-4 md:p-6 space-y-6 pb-20 border-x border-border/40 min-h-screen">
       {/* Header */}
       <div className="flex items-center gap-3 pb-3 border-b border-border">
         <div className="p-2 rounded-xl bg-gradient-to-br from-brand-medium/20 to-brand-dark/10">

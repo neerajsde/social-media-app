@@ -48,11 +48,18 @@ export default function ExplorePage() {
   };
 
   return (
-    <div className="w-full max-w-2xl border-r border-border/40 min-h-screen">
-      <div className="sticky top-0 z-20 bg-background/85 backdrop-blur-xl">
-        <div className="flex items-center gap-2 px-4 py-3">
-          <Compass className="w-5 h-5 text-brand-dark dark:text-brand-medium" />
-          <h1 className="text-lg font-bold tracking-tight">Explore</h1>
+    <div className="w-full max-w-2xl border-x border-white/5 bg-[#111111] min-h-screen">
+      <div 
+        className="sticky top-0 z-20 bg-[#111111]/80 backdrop-blur-2xl border-b border-white/5 cursor-pointer hover:bg-[#111111]/90 transition-all duration-300 group/header"
+        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+      >
+        <div className="px-4 py-3 sm:py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-full bg-white/5 group-hover/header:bg-white/10 flex items-center justify-center transition-colors">
+              <Compass className="w-4.5 h-4.5 text-brand-medium" />
+            </div>
+            <h1 className="text-lg sm:text-xl font-bold font-heading tracking-tight text-white/90">Explore</h1>
+          </div>
         </div>
         <Tabs value={tab} onValueChange={setTab} className="tab-line">
           <TabsList className="w-full bg-transparent justify-start rounded-none border-b border-border/60 p-0 px-4 h-auto gap-0">

@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { io, Socket } from 'socket.io-client';
-import { useAppSelector } from '../lib/hooks';
+import { useAppSelector, useAppDispatch } from '../lib/hooks';
 import {
   useGetNotificationsQuery,
   useGetNotificationUnreadCountQuery,
@@ -9,14 +9,13 @@ import {
   notificationApi,
   AppNotification
 } from '../lib/features/notification/notificationApi';
-import { useDispatch } from 'react-redux';
 import { playNotificationSound } from '../lib/playSound';
 
 const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL || process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') || 'http://localhost:7682';
 
 export const useNotifications = () => {
   const { accessToken, user } = useAppSelector((state) => state.auth);
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   
   const [page, setPage] = useState(1);
   const [socket, setSocket] = useState<Socket | null>(null);

@@ -294,26 +294,31 @@ export default function ProfilePage({ params }: { params: Promise<{ username: st
   };
 
   return (
-    <div className="max-w-2xl mx-auto pb-10">
-      {/* Header */}
-      <div className="sticky top-0 z-20 bg-background/80 backdrop-blur-xl border-b border-border px-4 py-3 flex items-center gap-3">
-        <LinkNext href="/">
-          <Button variant="ghost" size="icon" className="w-8 h-8 rounded-full hover:bg-muted/80">
-            <ArrowLeft className="w-4 h-4 text-foreground" />
-          </Button>
-        </LinkNext>
-        <div>
-          <h1 className="text-sm font-bold flex items-center gap-1">
-            {user.first_name || user.username} {user.last_name || ''}
-            {user.isVerified && (
-              <span className="text-brand-medium inline-block" title="Verified Creator">
-                <svg className="w-4.5 h-4.5" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
-                </svg>
-              </span>
-            )}
-          </h1>
-          <p className="text-xs text-muted-foreground">{user.postCount ?? 0} posts</p>
+    <div className="w-full max-w-2xl border-x border-white/5 bg-[#111111] min-h-screen pb-10">
+      {/* Premium Header */}
+      <div 
+        className="sticky top-0 z-20 bg-[#111111]/80 backdrop-blur-2xl border-b border-white/5 cursor-pointer hover:bg-[#111111]/90 transition-all duration-300 group/header"
+        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+      >
+        <div className="px-4 py-3 flex items-center gap-4">
+          <LinkNext href="/" onClick={(e) => e.stopPropagation()}>
+            <Button variant="ghost" size="icon" className="w-9 h-9 rounded-full bg-white/5 hover:bg-white/10 transition-colors">
+              <ArrowLeft className="w-4.5 h-4.5 text-white/90" />
+            </Button>
+          </LinkNext>
+          <div className="flex flex-col">
+            <h1 className="text-lg font-bold tracking-tight text-white/90 flex items-center gap-1.5 leading-tight">
+              {user.first_name || user.username} {user.last_name || ''}
+              {user.isVerified && (
+                <span className="text-brand-medium inline-block" title="Verified Creator">
+                  <svg className="w-4.5 h-4.5" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
+                  </svg>
+                </span>
+              )}
+            </h1>
+            <p className="text-xs text-muted-foreground">{user.postCount ?? 0} posts</p>
+          </div>
         </div>
       </div>
 

@@ -10,14 +10,22 @@ export default function SavedPage() {
   const savedPosts = data?.posts || [];
 
   return (
-    <div className="w-full max-w-2xl border-r border-border/40 min-h-screen">
-      {/* Header */}
-      <div className="sticky top-0 z-20 bg-background/80 backdrop-blur-xl border-b border-border px-4 py-3">
-        <h1 className="text-xl font-bold flex items-center gap-2">
-          <Bookmark className="w-5 h-5 text-brand-dark dark:text-brand-medium" />
-          Bookmarks
-        </h1>
-        <p className="text-xs text-muted-foreground mt-0.5">Your private collection of saved content</p>
+    <div className="w-full max-w-2xl border-x border-white/5 bg-[#111111] min-h-screen">
+      <div 
+        className="sticky top-0 z-20 bg-[#111111]/80 backdrop-blur-2xl border-b border-white/5 cursor-pointer hover:bg-[#111111]/90 transition-all duration-300 group/header"
+        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+      >
+        <div className="px-4 py-3 sm:py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-full bg-white/5 group-hover/header:bg-white/10 flex items-center justify-center transition-colors">
+              <Bookmark className="w-4.5 h-4.5 text-brand-medium" />
+            </div>
+            <div>
+              <h1 className="text-lg sm:text-xl font-bold font-heading tracking-tight text-white/90">Bookmarks</h1>
+              <p className="text-[11px] sm:text-xs text-muted-foreground mt-0.5">Your private collection of saved content</p>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div className="p-4 space-y-4">

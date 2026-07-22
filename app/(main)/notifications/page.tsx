@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Bell, Heart, MessageCircle, UserPlus, CornerUpLeft, Award, Settings, CheckCheck, Trash2, Sparkles } from 'lucide-react';
+import { Bell, Heart, MessageCircle, UserPlus, CornerUpLeft, Award, Settings, CheckCheck, Trash2, Sparkles, Loader2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -17,7 +17,8 @@ export default function NotificationsPage() {
     unreadCount,
     markAsRead, 
     markAllAsRead, 
-    isLoading 
+    isLoading,
+    isMarkingAllRead: isMarkingAllAsRead
   } = useNotifications();
 
   const getIcon = (type: string) => {
@@ -60,19 +61,30 @@ export default function NotificationsPage() {
   };
 
   return (
-    <div className="w-full max-w-2xl border-r border-border/40 min-h-screen">
-      {/* Header */}
-      <div className="sticky top-0 z-20 bg-background/80 backdrop-blur-xl border-b border-border px-4 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Bell className="w-5 h-5 text-brand-dark dark:text-brand-medium" />
-          <h1 className="text-lg font-bold">Notifications</h1>
-        </div>
-        <div className="flex items-center gap-1">
-          {unreadCount > 0 && (
-            <Button variant="ghost" size="icon" onClick={() => markAllAsRead()} title="Mark all as read" className="w-8 h-8 text-muted-foreground hover:text-foreground">
-              <CheckCheck className="w-4 h-4" />
+    <div className="w-full max-w-2xl border-x border-white/5 bg-[#111111] min-h-screen">
+      <div 
+        className="sticky top-0 z-20 bg-[#111111]/80 backdrop-blur-2xl border-b border-white/5 cursor-pointer hover:bg-[#111111]/90 transition-all duration-300 group/header"
+        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+      >
+        <div className="px-4 py-3 sm:py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-full bg-white/5 group-hover/header:bg-white/10 flex items-center justify-center transition-colors">
+              <Bell className="w-4.5 h-4.5 text-brand-medium" />
+            </div>
+            <h1 className="text-lg sm:text-xl font-bold font-heading tracking-tight text-white/90">Notifications</h1>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={(e) => { e.stopPropagation(); markAllAsRead(); }}
+              disabled={isMarkingAllAsRead || unreadCount === 0}
+              className="text-xs font-semibold text-brand-medium hover:text-brand-medium/80 hover:bg-white/5 h-8 rounded-full px-3"
+            >
+              {isMarkingAllAsRead ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCheck className="w-4 h-4 mr-1.5" />}
+              Mark all read
             </Button>
-          )}
+          </div>
         </div>
       </div>
 

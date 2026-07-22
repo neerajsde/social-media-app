@@ -80,9 +80,8 @@ export const NotificationCenter = () => {
 
   return (
     <Popover>
-      <PopoverTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative hover:bg-muted/50 rounded-full transition-colors">
-          <Bell className="h-5 w-5" />
+      <PopoverTrigger className="relative flex items-center justify-center h-10 w-10 hover:bg-muted/50 rounded-full transition-colors focus-visible:outline-none">
+        <Bell className="h-5 w-5" />
           {unreadCount > 0 && (
             <Badge 
               variant="destructive" 
@@ -91,7 +90,6 @@ export const NotificationCenter = () => {
               {unreadCount > 99 ? '99+' : unreadCount}
             </Badge>
           )}
-        </Button>
       </PopoverTrigger>
       
       <PopoverContent align="end" className="w-[380px] p-0 shadow-2xl border-border/40 rounded-xl overflow-hidden backdrop-blur-xl bg-background/95">

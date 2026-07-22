@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ImageIcon, Video as VideoIcon, Globe, Users, Lock, Sparkles, Hash, Loader2, X } from 'lucide-react';
+import { ImageIcon, Video as VideoIcon, Globe, Users, Lock, Sparkles, Hash, Loader2, X, PlusSquare } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -182,17 +182,22 @@ export default function CreatePostPage() {
   };
 
   return (
-    <div className="w-full max-w-2xl border-r border-border/40 p-4 space-y-6 min-h-screen">
-      <div className="flex items-center justify-between pb-2 border-b border-border">
-        <h1 className="text-xl font-bold font-heading">Create Post</h1>
+    <div className="w-full max-w-2xl border-x border-white/5 bg-[#111111] min-h-screen">
+      <div className="sticky top-0 z-20 bg-[#111111]/80 backdrop-blur-2xl border-b border-white/5 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-full bg-white/5 flex items-center justify-center">
+            <PlusSquare className="w-4.5 h-4.5 text-brand-medium" />
+          </div>
+          <h1 className="text-lg sm:text-xl font-bold font-heading tracking-tight text-white/90">Create Post</h1>
+        </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={() => handleSubmit('draft')} disabled={isPublishing || isUploading}>
+          <Button variant="outline" size="sm" onClick={() => handleSubmit('draft')} disabled={isPublishing || isUploading} className="h-8 rounded-full border-white/10 text-white/70 hover:text-white hover:bg-white/5">
             Save Draft
           </Button>
-          <Button size="sm" className="bg-brand-dark hover:bg-brand-dark/95 text-brand-lightest" onClick={() => handleSubmit('active')} disabled={isPublishing || isUploading}>
+          <Button size="sm" className="bg-brand-medium hover:bg-brand-medium/90 text-white h-8 rounded-full px-4" onClick={() => handleSubmit('active')} disabled={isPublishing || isUploading}>
             {isPublishing ? (
               <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
                 Publishing...
               </>
             ) : (
@@ -201,6 +206,8 @@ export default function CreatePostPage() {
           </Button>
         </div>
       </div>
+      
+      <div className="p-4 space-y-6">
 
       <Tabs value={postType} onValueChange={(v) => {
         setPostType(v as any);
@@ -493,6 +500,7 @@ export default function CreatePostPage() {
           </div>
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 }

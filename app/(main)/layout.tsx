@@ -15,7 +15,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         {/* Main Content */}
         <main className="flex-1 min-w-0 pb-16 md:pb-0 relative">
           <div className="flex w-full min-h-screen">
-            <div className="flex-1 min-w-0 flex flex-col">
+            <div className="flex-1 min-w-0 flex flex-col items-center">
               {children}
             </div>
             <RightSidebar />

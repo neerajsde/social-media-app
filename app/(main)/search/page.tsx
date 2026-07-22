@@ -136,16 +136,19 @@ function SearchPageContent() {
   };
 
   return (
-    <div className="w-full max-w-2xl border-r border-border/40 min-h-screen">
-      <div className="sticky top-0 z-20 bg-background/80 backdrop-blur-xl border-b border-border p-4 space-y-3">
-        <div className="relative">
-          <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+    <div className="w-full max-w-2xl border-x border-white/5 bg-[#111111] min-h-screen pb-16 md:pb-0">
+      {/* Sticky Search Header */}
+      <div 
+        className="sticky top-0 z-20 bg-[#111111]/80 backdrop-blur-2xl border-b border-white/5 p-3 sm:p-4 space-y-3 cursor-pointer hover:bg-[#111111]/90 transition-all duration-300 group/header"
+        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+      >
+        <div className="relative" onClick={(e) => e.stopPropagation()}>
+          <SearchIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-muted-foreground" />
           <Input
             placeholder="Search posts, people, tags..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="pl-10 pr-10"
-            autoFocus
+            className="pl-10 h-10 sm:h-11 bg-white/5 border-white/10 focus:border-brand-medium rounded-full text-sm placeholder:text-muted-foreground/70"
           />
           {query && (
             <Button

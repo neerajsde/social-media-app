@@ -49,7 +49,7 @@ export default function Sidebar() {
   return (
     <TooltipProvider delay={0}>
       <aside className={cn(
-        "sticky top-0 h-screen border-r border-border/40 flex flex-col bg-background/98 backdrop-blur-xl z-30 shrink-0 transition-all duration-300",
+        "sticky top-0 h-screen border-r border-border/40 flex flex-col bg-[#1a1a1a] z-30 shrink-0 transition-all duration-300",
         isCollapsed ? "w-[68px]" : "w-[68px] xl:w-[248px]"
       )}>
         {/* Logo and Toggle Header */}
