@@ -1,13 +1,13 @@
 'use client';
 
-import { Bookmark, Inbox } from 'lucide-react';
+import { Bookmark, Inbox, Loader2 } from 'lucide-react';
 import PostCard from '@/components/shared/PostCard';
-import { mockPosts } from '@/lib/mock-data';
+import { useGetBookmarkedPostsQuery } from '@/lib/features/post/postApi';
 import { Separator } from '@/components/ui/separator';
 
 export default function SavedPage() {
-  // Let us mock the user having saved the first two posts
-  const savedPosts = mockPosts.slice(0, 2).map((post) => ({ ...post, isBookmarked: true }));
+  const { data, isLoading, isError } = useGetBookmarkedPostsQuery({ page: 1, limit: 20 });
+  const savedPosts = data?.posts || [];
 
   return (
     <div className="w-full max-w-2xl border-r border-border/40 min-h-screen">
@@ -21,8 +21,16 @@ export default function SavedPage() {
       </div>
 
       <div className="p-4 space-y-4">
-        {savedPosts.length > 0 ? (
-          savedPosts.map((post) => (
+        {isLoading ? (
+          <div className="flex justify-center py-12">
+            <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+          </div>
+        ) : isError ? (
+          <div className="text-center py-12 text-muted-foreground">
+            Failed to load bookmarks. Please try again.
+          </div>
+        ) : savedPosts.length > 0 ? (
+          savedPosts.map((post: any) => (
             <PostCard key={post.id} post={post} />
           ))
         ) : (
