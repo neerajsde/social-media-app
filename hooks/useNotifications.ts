@@ -3,7 +3,7 @@ import { io, Socket } from 'socket.io-client';
 import { useAppSelector } from '../lib/hooks';
 import {
   useGetNotificationsQuery,
-  useGetUnreadCountQuery,
+  useGetNotificationUnreadCountQuery,
   useMarkAsReadMutation,
   useMarkAllAsReadMutation,
   notificationApi,
@@ -29,7 +29,7 @@ export const useNotifications = () => {
     refetch 
   } = useGetNotificationsQuery({ page }, { skip: !accessToken });
 
-  const { data: countData, refetch: refetchCount } = useGetUnreadCountQuery(undefined, { skip: !accessToken });
+  const { data: countData, refetch: refetchCount } = useGetNotificationUnreadCountQuery(undefined, { skip: !accessToken });
 
   // Mutations
   const [markAsRead, { isLoading: isMarkingRead }] = useMarkAsReadMutation();

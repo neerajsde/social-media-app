@@ -23,8 +23,8 @@ import { Button } from '@/components/ui/button';
 import { useAppSelector } from '@/lib/hooks';
 import { toast } from 'sonner';
 import { useGetFeedQuery, useCreatePostMutation } from '@/lib/features/post/postApi';
-import { useGetUnreadCountQuery as useGetNotificationsUnreadCountQuery } from '@/lib/features/notification/notificationApi';
-import { useGetUnreadCountQuery as useGetChatUnreadCountQuery } from '@/lib/features/chat/chatApi';
+import { useGetNotificationUnreadCountQuery as useGetNotificationsUnreadCountQuery } from '@/lib/features/notification/notificationApi';
+import { useGetChatUnreadCountQuery } from '@/lib/features/chat/chatApi';
 import { normalizeFeedPost } from '@/lib/post-utils';
 import type { FeedType, Post } from '@/lib/types';
 
@@ -120,7 +120,7 @@ export default function HomePage() {
   };
 
   return (
-    <div className="w-full max-w-2xl border-r border-border/40 min-h-screen">
+    <div className="w-full max-w-2xl mx-auto min-h-screen">
       {/* Header */}
       <div className="sticky top-0 z-20 bg-background/85 backdrop-blur-xl">
         <div className="px-3 sm:px-4 py-3 flex items-center justify-between">
@@ -170,7 +170,7 @@ export default function HomePage() {
 
       {/* Feed Composer */}
       {isAuthenticated && user && (
-        <div className="p-4 mb-4 mx-3 sm:mx-4 border border-border/20 bg-card rounded-2xl flex gap-3 shadow-sm">
+        <div className="p-4 mt-4 mx-3 sm:mx-4 border border-border/20 bg-card rounded-2xl flex gap-3 shadow-sm">
           <Avatar className="w-9 h-9 sm:w-10 sm:h-10 border border-border shrink-0">
             <AvatarImage src={user.avatarUrl} alt={user.username} />
             <AvatarFallback className="bg-brand-medium/20 text-brand-dark text-xs">

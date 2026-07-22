@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import { Home, Search, MessageCircle, Bell, User, Compass } from 'lucide-react';
 import { useAppSelector } from '@/lib/hooks';
 import { cn } from '@/lib/utils';
-import { useGetUnreadCountQuery as useGetChatUnreadCountQuery } from '@/lib/features/chat/chatApi';
+import { useGetChatUnreadCountQuery } from '@/lib/features/chat/chatApi';
 
 const mobileNavItems = [
   { href: '/', icon: Home, label: 'Home' },

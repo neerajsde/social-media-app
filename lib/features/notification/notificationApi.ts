@@ -59,7 +59,7 @@ export const notificationApi = baseApi.injectEndpoints({
         return currentArg?.page !== previousArg?.page;
       },
     }),
-    getUnreadCount: builder.query<{ success: boolean; count: number }, void>({
+    getNotificationUnreadCount: builder.query<{ success: boolean; count: number }, void>({
       query: () => '/notification/unread-count',
       providesTags: ['NotificationCount'],
     }),
@@ -95,7 +95,7 @@ export const notificationApi = baseApi.injectEndpoints({
 
 export const {
   useGetNotificationsQuery,
-  useGetUnreadCountQuery,
+  useGetNotificationUnreadCountQuery,
   useMarkAsReadMutation,
   useMarkAllAsReadMutation,
 } = notificationApi;

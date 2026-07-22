@@ -188,7 +188,7 @@ export interface FeedResponse {
   };
 }
 
-export type FeedType = 'foryou' | 'following';
+export type FeedType = 'foryou' | 'following' | 'trending';
 
 // ─── Search Types ────────────────────────────────────
 export type SearchType = 'foryou' | 'account' | 'trending' | 'tags' | 'posts';

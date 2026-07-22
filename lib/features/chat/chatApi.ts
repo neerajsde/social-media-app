@@ -18,7 +18,7 @@ export const chatApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ['Chat'],
     }),
-    getUnreadCount: builder.query<{ success: boolean; count: number }, void>({
+    getChatUnreadCount: builder.query<{ success: boolean; count: number }, void>({
       query: () => '/chat/unread-count',
       providesTags: ['Chat'],
     }),
@@ -36,6 +36,6 @@ export const {
   useGetConversationsQuery,
   useGetMessagesQuery,
   useSendMessageMutation,
-  useGetUnreadCountQuery,
+  useGetChatUnreadCountQuery,
   useMarkConversationAsReadMutation,
 } = chatApi;

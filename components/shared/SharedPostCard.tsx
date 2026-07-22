@@ -17,7 +17,7 @@ export default function SharedPostCard({ postId }: SharedPostCardProps) {
 
   if (isLoading) {
     return (
-      <Card className="w-64 border border-border bg-card/45 backdrop-blur-md">
+      <Card className="w-[260px] max-w-full border border-border bg-card/45 backdrop-blur-md">
         <CardContent className="p-3 space-y-3">
           <Skeleton className="w-full h-32 rounded-lg bg-muted" />
           <div className="space-y-2">
@@ -31,7 +31,7 @@ export default function SharedPostCard({ postId }: SharedPostCardProps) {
 
   if (error || !post) {
     return (
-      <Card className="w-64 border border-destructive/20 bg-destructive/5 backdrop-blur-md">
+      <Card className="w-[260px] max-w-full border border-destructive/20 bg-destructive/5 backdrop-blur-md">
         <CardContent className="p-3 text-center text-xs text-muted-foreground">
           Post unavailable or deleted.
         </CardContent>
@@ -43,7 +43,7 @@ export default function SharedPostCard({ postId }: SharedPostCardProps) {
   const authorName = post.author?.username || 'user';
 
   return (
-    <Card className="w-64 overflow-hidden border border-border/80 bg-gradient-to-b from-card to-card/75 shadow-md hover:shadow-lg transition-all duration-200 group">
+    <Card className="w-[260px] max-w-full overflow-hidden border border-border/80 bg-gradient-to-b from-card to-card/75 shadow-md hover:shadow-lg transition-all duration-200 group">
       <CardContent className="p-0">
         {postImage ? (
           <div className="relative w-full h-32 bg-black/40 overflow-hidden">
