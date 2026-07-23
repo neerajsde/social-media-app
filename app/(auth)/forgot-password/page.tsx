@@ -14,6 +14,7 @@ import { toast } from 'sonner';
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
   const [sent, setSent] = useState(false);
+  const [resetToken, setResetToken] = useState('');
   const [resetRequest, { isLoading }] = useResetPasswordRequestMutation();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -21,8 +22,9 @@ export default function ForgotPasswordPage() {
     if (!email.trim()) { toast.error('Please enter your email or username'); return; }
 
     try {
-      await resetRequest({ emailOrUsername: email }).unwrap();
+      const result = await resetRequest({ emailOrUsername: email }).unwrap();
       setSent(true);
+      if (result.token) setResetToken(result.token);
       toast.success('Reset link sent!');
     } catch (err: any) {
       toast.error('Failed to send reset link', { description: err?.data?.message || 'Please try again.' });
@@ -50,7 +52,7 @@ export default function ForgotPasswordPage() {
         <CardContent>
           {sent ? (
             <div className="space-y-4">
-              <Button className="w-full bg-brand-dark hover:bg-brand-dark/90 text-brand-lightest" nativeButton={false} render={<Link href="/reset-password" />}>
+              <Button className="w-full bg-brand-dark hover:bg-brand-dark/90 text-brand-lightest" nativeButton={false} render={<Link href={`/reset-password?token=${resetToken}`} />}>
                 Enter OTP
               </Button>
               <Button variant="ghost" className="w-full text-sm" onClick={() => setSent(false)}>

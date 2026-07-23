@@ -18,6 +18,10 @@ export interface User {
   isFollowing?: boolean;
   follower?: number;
   following?: number;
+  followsYou?: boolean;
+  totp?: {
+    enabled: boolean;
+  };
 }
 
 export interface UserProfile {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -113,9 +113,20 @@ export default function HomePage() {
     router.push(`/create?type=${type}`);
   };
 
-  const handleLoadMore = () => {
-    if (hasMore && !isFetching) setPage((p) => p + 1);
-  };
+  const observer = useRef<IntersectionObserver | null>(null);
+  const lastElementRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      if (isFetching) return;
+      if (observer.current) observer.current.disconnect();
+      observer.current = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && hasMore) {
+          setPage((p) => p + 1);
+        }
+      });
+      if (node) observer.current.observe(node);
+    },
+    [isFetching, hasMore]
+  );
 
   const handleTabChange = (value: string) => {
     setActiveTab(value as FeedType);
@@ -307,23 +318,13 @@ export default function HomePage() {
             ))}
 
             {hasMore && (
-              <div className="flex justify-center pt-2 pb-4">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleLoadMore}
-                  disabled={isFetching}
-                  className="w-full sm:w-auto min-w-[140px] gap-2"
-                >
-                  {isFetching ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      Loading...
-                    </>
-                  ) : (
-                    'Load more'
-                  )}
-                </Button>
+              <div ref={lastElementRef} className="flex justify-center pt-4 pb-8">
+                {isFetching && (
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    <span>Loading more...</span>
+                  </div>
+                )}
               </div>
             )}
           </>

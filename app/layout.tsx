@@ -19,12 +19,12 @@ export const metadata: Metadata = {
     template: "%s | ReelTube",
     default: "ReelTube - Connect, Share, and Discover",
   },
-  description: "A premium next-generation social media platform for real-time engagement, collaborative posting, and media discovery.",
+  description: "A premium next-generation ReelTube platform for real-time engagement, collaborative posting, and media discovery.",
   openGraph: {
     type: "website",
     siteName: "ReelTube",
     title: "ReelTube - Connect, Share, and Discover",
-    description: "A premium next-generation social media platform for real-time engagement, collaborative posting, and media discovery.",
+    description: "A premium next-generation ReelTube platform for real-time engagement, collaborative posting, and media discovery.",
     images: [
       {
         url: "/images/logo.png",
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary",
     title: "ReelTube - Connect, Share, and Discover",
-    description: "A premium next-generation social media platform for real-time engagement.",
+    description: "A premium next-generation ReelTube platform for real-time engagement.",
     images: ["/images/logo.png"],
   },
 };
@@ -51,8 +51,9 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${outfit.variable} ${plusJakarta.variable} dark h-full antialiased`}
+      suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col">
+      <body className="min-h-full flex flex-col" suppressHydrationWarning>
         <StoreProvider>
           {children}
           <Toaster />

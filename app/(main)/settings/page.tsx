@@ -148,6 +148,7 @@ export default function SettingsPage() {
       setBirthdate((user.profile as any)?.birthdate ? new Date((user.profile as any).birthdate).toISOString().split('T')[0] : '');
       setLocation((user.profile as any)?.location ?? '');
       setWebsiteUrl((user.profile as any)?.websiteUrl ?? '');
+      setTwoFAEnabled(user.totp?.enabled ?? false);
     }
   }, [user]);
 

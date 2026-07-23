@@ -21,7 +21,7 @@ export default function AboutPage() {
           <Logo imageClassName="h-16" />
           <h1 className="text-4xl font-bold">About ReelTube</h1>
           <p className="text-muted-foreground text-center max-w-xl">
-            A premium next-generation social media platform built for real-time engagement, collaborative posting, and media discovery.
+            A premium next-generation ReelTube platform built for real-time engagement, collaborative posting, and media discovery.
           </p>
         </div>
 
@@ -43,7 +43,7 @@ export default function AboutPage() {
           <section>
             <h2 className="text-2xl font-semibold mb-3">Join the Community</h2>
             <p className="text-muted-foreground leading-relaxed">
-              Whether you're a creator looking to grow your audience or a viewer discovering new content, ReelTube is the place for you. Join thousands of users who are already part of the next generation of social media.
+              Whether you're a creator looking to grow your audience or a viewer discovering new content, ReelTube is the place for you. Join thousands of users who are already part of the next generation of ReelTube.
             </p>
           </section>
         </div>

@@ -6,7 +6,7 @@ import { useState } from 'react';
 import {
   Home, Search, Bell, MessageCircle, Bookmark, User,
   Settings, PlusSquare, TrendingUp, LogOut, Compass, MoreHorizontal,
-  PanelLeftClose, PanelLeftOpen, Menu, PlaySquare
+  PanelLeftClose, PanelLeftOpen, Menu, PlaySquare, Users
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -26,6 +26,7 @@ const navItems = [
   { href: '/explore', icon: Compass, label: 'Explore' },
   { href: '/reels', icon: PlaySquare, label: 'Reels' },
   { href: '/search', icon: Search, label: 'Search' },
+  { href: '/suggested', icon: Users, label: 'Suggested Users', auth: true },
   { href: '/notifications', icon: Bell, label: 'Notifications', auth: true },
   { href: '/messages', icon: MessageCircle, label: 'Messages', auth: true },
   { href: '/saved', icon: Bookmark, label: 'Saved', auth: true },
@@ -58,9 +59,12 @@ export default function Sidebar() {
         <div className={cn("h-16 flex items-center border-b border-border/40 transition-all duration-300 group/header relative", isCollapsed ? "justify-center px-0" : "px-3 xl:px-5 justify-between")}>
           <Link href="/" className={cn("flex items-center group/logo transition-opacity duration-200", isCollapsed && "group-hover/header:opacity-0")}>
             {isCollapsed ? (
-              <Logo imageClassName="h-8" />
+              <Logo imageClassName="h-8" collapsed={true} />
             ) : (
-              <Logo className="hidden xl:flex" imageClassName="h-8" />
+              <>
+                <Logo className="xl:hidden" imageClassName="h-8" collapsed={true} />
+                <Logo className="hidden xl:flex" imageClassName="h-8" />
+              </>
             )}
           </Link>
 

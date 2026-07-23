@@ -111,11 +111,11 @@ export default function MessagesPage() {
   };
 
   return (
-    <div className="w-full h-screen flex">
+    <div className="w-full h-[calc(100dvh-64px)] md:h-[100dvh] flex">
       {/* ─── Conversations Sidebar ─── */}
       <div
         className={cn(
-          'w-full md:w-[340px] lg:w-[380px] shrink-0 flex flex-col h-screen border-r border-border/60 bg-[#1a1a1a]',
+          'w-full md:w-[340px] lg:w-[380px] shrink-0 flex flex-col h-full border-r border-border/60 bg-[#1a1a1a]',
           activeConv && 'hidden md:flex'
         )}
       >
@@ -262,7 +262,7 @@ export default function MessagesPage() {
       </div>
 
       {/* ─── Chat Window ─── */}
-      <div className={cn('flex-1 flex flex-col h-screen min-w-0 bg-[#111111]', !activeConv && 'hidden md:flex')}>
+      <div className={cn('flex-1 flex flex-col h-full min-w-0 bg-[#111111]', !activeConv && 'hidden md:flex')}>
         {activeConv && participant ? (
           <>
             {/* Chat Header */}

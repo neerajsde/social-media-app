@@ -7,15 +7,16 @@ import { cn } from '@/lib/utils';
 interface LogoProps {
   className?: string;
   imageClassName?: string;
+  collapsed?: boolean;
 }
 
-export default function Logo({ className, imageClassName }: LogoProps) {
+export default function Logo({ className, imageClassName, collapsed }: LogoProps) {
   return (
     <div className={cn("flex items-center justify-center", className)}>
       <Image 
-        src="/images/logo.png" 
+        src={collapsed ? "/images/small_logo.png" : "/images/logo.png"} 
         alt="ReelTube Logo" 
-        width={150} 
+        width={collapsed ? 40 : 150} 
         height={40} 
         priority
         className={cn("object-contain h-10 w-auto", imageClassName)}

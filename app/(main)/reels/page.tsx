@@ -72,7 +72,7 @@ function ReelsPageContent() {
   }
 
   return (
-    <div className="w-full h-[100dvh] md:h-screen bg-[#111111] relative flex justify-center">
+    <div className="w-full h-[calc(100dvh-64px)] md:h-screen bg-[#111111] relative flex justify-center overflow-hidden">
       <div className="w-full max-w-[500px] h-full relative">
         <ReelsFeed 
           reels={reels}
