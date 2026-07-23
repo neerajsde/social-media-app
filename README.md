@@ -2,7 +2,7 @@
 
 <div align="center">
 
-  **A Premium Next-Generation Social Media Platform**
+  **A Premium Next-Generation ReelTube Platform**
 
   [![Next.js](https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white)](https://nextjs.org/)
   [![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://react.dev/)
@@ -17,7 +17,7 @@
 
 ## 📖 Introduction
 
-ReelTube is a modern, high-performance social media and OTT platform tailored for seamless media sharing, real-time engagement, and short-form video content (Reels). This repository contains the Next.js frontend built with performance, premium UI/UX, and scalability in mind.
+ReelTube is a modern, high-performance ReelTube and OTT platform tailored for seamless media sharing, real-time engagement, and short-form video content (Reels). This repository contains the Next.js frontend built with performance, premium UI/UX, and scalability in mind.
 
 ### 💡 Key Highlights
 - **Premium Aesthetics**: Designed with a sleek dark mode, glassmorphism UI components, smooth micro-animations, and responsive layouts across all devices using Tailwind CSS and Radix/Shadcn UI.
