@@ -2,6 +2,7 @@ import Sidebar from '@/components/layout/Sidebar';
 import MobileNav from '@/components/layout/MobileNav';
 import RightSidebar from '@/components/layout/RightSidebar';
 import AuthGuard from '@/components/auth/AuthGuard';
+import VideoProgressTracker from '@/components/shared/VideoProgressTracker';
 
 export default function MainLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -25,6 +26,7 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
         {/* Mobile Bottom Nav */}
         <MobileNav />
       </div>
+      <VideoProgressTracker />
     </AuthGuard>
   );
 }

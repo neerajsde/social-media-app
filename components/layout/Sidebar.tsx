@@ -6,7 +6,7 @@ import { useState } from 'react';
 import {
   Home, Search, Bell, MessageCircle, Bookmark, User,
   Settings, PlusSquare, TrendingUp, LogOut, Compass, MoreHorizontal,
-  PanelLeftClose, PanelLeftOpen, Menu
+  PanelLeftClose, PanelLeftOpen, Menu, PlaySquare
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -23,6 +23,7 @@ import { useGetChatUnreadCountQuery } from '@/lib/features/chat/chatApi';
 const navItems = [
   { href: '/', icon: Home, label: 'Home' },
   { href: '/explore', icon: Compass, label: 'Explore' },
+  { href: '/reels', icon: PlaySquare, label: 'Reels' },
   { href: '/search', icon: Search, label: 'Search' },
   { href: '/notifications', icon: Bell, label: 'Notifications', auth: true },
   { href: '/messages', icon: MessageCircle, label: 'Messages', auth: true },

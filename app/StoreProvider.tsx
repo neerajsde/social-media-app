@@ -5,6 +5,7 @@ import { makeStore, AppStore } from '../lib/store'
 import { useAppDispatch, useAppSelector } from '../lib/hooks'
 import { useGetProfileQuery } from '../lib/features/user/userApi'
 import { setUser, logout, setCredentials, setAuthInitialized } from '../lib/features/auth/authSlice'
+import { restoreVideoUploadState } from '../lib/features/post/videoUploadSlice'
 
 function AuthInit({ children }: { children: React.ReactNode }) {
   const dispatch = useAppDispatch();
@@ -66,6 +67,32 @@ export default function StoreProvider({
   if (!storeRef.current) {
     // Create the store instance the first time this renders
     storeRef.current = makeStore()
+
+    if (typeof window !== 'undefined') {
+      try {
+        const savedVideoState = localStorage.getItem('videoUploadState');
+        if (savedVideoState) {
+          const parsedState = JSON.parse(savedVideoState);
+          // Only restore if it's currently processing to avoid stuck states from old failed runs
+          if (parsedState?.isProcessing) {
+            storeRef.current.dispatch(restoreVideoUploadState(parsedState));
+          }
+        }
+      } catch (e) {
+        console.warn('Failed to restore video upload state:', e);
+      }
+
+      storeRef.current.subscribe(() => {
+        const state = storeRef.current?.getState().videoUpload;
+        if (state) {
+          if (state.isProcessing) {
+            localStorage.setItem('videoUploadState', JSON.stringify(state));
+          } else {
+            localStorage.removeItem('videoUploadState');
+          }
+        }
+      });
+    }
   }
 
   return (

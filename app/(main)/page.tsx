@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import PostCard from '@/components/shared/PostCard';
 import PostSkeleton from '@/components/shared/PostSkeleton';
+import VideoUploadBanner from '@/components/shared/VideoUploadBanner';
 import {
   Sparkles,
   Clock,
@@ -176,6 +177,8 @@ export default function HomePage() {
           </TabsList>
         </Tabs>
       </div>
+
+      <VideoUploadBanner />
 
       {/* Feed Composer */}
       {isAuthenticated && user && (

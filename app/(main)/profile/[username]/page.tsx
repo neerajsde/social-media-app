@@ -23,6 +23,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import PostCard from '@/components/shared/PostCard';
 import AuthDialog from '@/components/shared/AuthDialog';
+import VideoUploadBanner from '@/components/shared/VideoUploadBanner';
 import { formatCount } from '@/lib/mock-data';
 import {
   useGetUserProfileByUsernameQuery,
@@ -321,6 +322,8 @@ export default function ProfilePage({ params }: { params: Promise<{ username: st
           </div>
         </div>
       </div>
+
+      {isOwner && <VideoUploadBanner />}
 
       {/* Banner */}
       <div className="relative group">

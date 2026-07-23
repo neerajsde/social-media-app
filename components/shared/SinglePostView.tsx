@@ -150,19 +150,19 @@ export default function SinglePostView({ post }: SinglePostViewProps) {
 
   return (
     <>
-      <div className="w-full max-w-2xl mx-auto flex flex-col min-h-screen bg-background md:py-6">
+      <div className="w-full max-w-2xl mx-auto flex flex-col min-h-screen bg-transparent md:py-6">
         {/* Navigation header for Mobile */}
-        <div className="sticky top-0 z-20 flex items-center gap-3 border-b border-border/50 bg-background/80 px-4 py-3 backdrop-blur-xl md:hidden">
+        <div className="sticky top-0 z-30 flex items-center gap-3 border-b border-white/5 bg-[#0a0a0a]/80 px-4 py-3 backdrop-blur-xl md:hidden">
           <Link href="/" aria-label="Back to feed">
-            <Button variant="ghost" size="icon" className="h-8 w-8">
-              <ArrowLeft className="h-4 w-4" />
+            <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full hover:bg-white/10">
+              <ArrowLeft className="h-4.5 w-4.5" />
             </Button>
           </Link>
-          <h1 className="text-sm font-bold">Post Details</h1>
+          <h1 className="text-lg font-bold font-heading tracking-tight">Post Details</h1>
         </div>
 
         {/* Main Post Card Container */}
-        <div className="flex flex-col bg-card border-x md:border border-border/20 md:rounded-2xl shadow-sm overflow-hidden mb-8">
+        <div className="flex flex-col bg-[#111111] border-y md:border border-white/5 md:rounded-3xl shadow-2xl overflow-hidden mb-8">
           
           {/* Post Header */}
           <PostHeader post={post} />
@@ -194,7 +194,7 @@ export default function SinglePostView({ post }: SinglePostViewProps) {
           </div>
 
           {/* Media Player */}
-          <div className="w-full flex items-center justify-center bg-[#050505] border-y border-border/20 relative">
+          <div className="w-full flex items-center justify-center bg-black border-y border-white/5 relative">
             <div className="w-full py-2">
               <PostMedia post={post} onDoubleLike={handleLikeToggle} />
             </div>
@@ -215,18 +215,18 @@ export default function SinglePostView({ post }: SinglePostViewProps) {
             onShareClick={handleShareClick}
           />
 
-          <div className="h-[1px] bg-border/20 w-full" />
+          <div className="h-[1px] bg-white/5 w-full" />
 
           {/* Comments Section */}
           <div className="flex flex-col w-full">
-            <div className="px-4 py-3 border-b border-border/10 bg-card/50">
-              <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+            <div className="px-5 py-4 border-b border-white/5 bg-[#111111]">
+              <h3 className="text-xs font-bold text-white/50 uppercase tracking-widest">
                 Comments ({totalComments})
               </h3>
             </div>
             
-            {/* Scrollable comments container - If content exceeds screen it will naturally scroll the page */}
-            <div className="px-4 py-4 w-full bg-card/30">
+            {/* Scrollable comments container */}
+            <div className="px-2 sm:px-4 py-4 w-full bg-[#111111]">
               <CommentSection
                 comments={commentsList}
                 postId={post.id}
@@ -239,7 +239,7 @@ export default function SinglePostView({ post }: SinglePostViewProps) {
             </div>
 
             {/* Comment Input */}
-            <div className="sticky bottom-0 p-3 border-t border-border/20 bg-card/95 backdrop-blur-md">
+            <div className="sticky bottom-0 p-4 border-t border-white/5 bg-[#0a0a0a]/90 backdrop-blur-2xl">
               <div id="comment-input-container">
                 <CommentInput onSubmit={handleCommentSubmit} autoFocus={false} />
               </div>

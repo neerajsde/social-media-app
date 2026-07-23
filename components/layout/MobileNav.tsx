@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Search, MessageCircle, Bell, User, Compass } from 'lucide-react';
+import { Home, Search, MessageCircle, Bell, User, Compass, PlaySquare } from 'lucide-react';
 import { useAppSelector } from '@/lib/hooks';
 import { cn } from '@/lib/utils';
 import { useGetChatUnreadCountQuery } from '@/lib/features/chat/chatApi';
@@ -10,6 +10,7 @@ import { useGetChatUnreadCountQuery } from '@/lib/features/chat/chatApi';
 const mobileNavItems = [
   { href: '/', icon: Home, label: 'Home' },
   { href: '/explore', icon: Compass, label: 'Explore' },
+  { href: '/reels', icon: PlaySquare, label: 'Reels' },
   { href: '/search', icon: Search, label: 'Search' },
   { href: '/messages', icon: MessageCircle, label: 'Message', auth: true },
   { href: '/profile', icon: User, label: 'Profile', auth: true },

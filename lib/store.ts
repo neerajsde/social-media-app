@@ -2,6 +2,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import { baseApi } from './services/api';
 import authReducer from './features/auth/authSlice';
 import uiReducer from './features/ui/uiSlice';
+import videoUploadReducer from './features/post/videoUploadSlice';
 
 export const makeStore = () => {
   return configureStore({
@@ -9,6 +10,7 @@ export const makeStore = () => {
       [baseApi.reducerPath]: baseApi.reducer,
       auth: authReducer,
       ui: uiReducer,
+      videoUpload: videoUploadReducer,
     },
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware().concat(baseApi.middleware),

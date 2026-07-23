@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight, Heart } from 'lucide-react';
 import { getMediaUrl } from '@/lib/media-url';
 import type { Post } from '@/lib/types';
 import { cn } from '@/lib/utils';
+import HlsVideoPlayer from './HlsVideoPlayer';
 
 interface PostMediaProps {
   post: Post;
@@ -16,7 +17,7 @@ export default function PostMedia({ post, onDoubleLike }: PostMediaProps) {
   const [showHeartPop, setShowHeartPop] = useState(false);
   const touchStartX = useRef<number | null>(null);
   const images = post.images ?? [];
-  const videoUrl = post.video?.originalVideo || post.video?.hlsMasterKey || post.mediaUrl;
+  const videoUrl = post.video?.hlsMasterKey || post.video?.originalVideo || post.mediaUrl;
 
   const handleDoubleClick = () => {
     if (onDoubleLike) {
@@ -142,15 +143,16 @@ export default function PostMedia({ post, onDoubleLike }: PostMediaProps) {
         className="relative overflow-hidden rounded-xl bg-black border border-border/30 shadow-inner flex items-center justify-center"
         onDoubleClick={handleDoubleClick}
       >
-        <video
-          src={getMediaUrl(videoUrl)}
+        <HlsVideoPlayer
+          src={getMediaUrl(videoUrl) || ''}
           poster={getMediaUrl(post.video?.thumbnail || post.thumbnailUrl)}
           controls
           playsInline
+          autoPlayOnScroll={true}
           className="aspect-video max-h-[75vh] w-full bg-black relative z-10"
         >
           Your browser does not support video playback.
-        </video>
+        </HlsVideoPlayer>
 
         {/* Double click heart popup overlay for video */}
         {showHeartPop && (
