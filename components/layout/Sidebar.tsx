@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useAppSelector, useAppDispatch } from '@/lib/hooks';
 import { cn } from '@/lib/utils';
+import Logo from '@/components/shared/Logo';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { logout } from '@/lib/features/auth/authSlice';
 import { toggleSidebar } from '@/lib/features/ui/uiSlice';
@@ -55,11 +56,12 @@ export default function Sidebar() {
       )}>
         {/* Logo and Toggle Header */}
         <div className={cn("h-16 flex items-center border-b border-border/40 transition-all duration-300 group/header relative", isCollapsed ? "justify-center px-0" : "px-3 xl:px-5 justify-between")}>
-          <Link href="/" className={cn("flex items-center gap-3 group/logo transition-opacity duration-200", isCollapsed && "group-hover/header:opacity-0")}>
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-dark to-brand-medium flex items-center justify-center shadow-lg shadow-brand-dark/30 group-hover/logo:shadow-brand-dark/50 transition-shadow shrink-0">
-              <TrendingUp className="w-4 h-4 text-white" />
-            </div>
-            <span className={cn("text-lg font-bold text-foreground tracking-tight transition-all duration-300", isCollapsed ? "hidden" : "hidden xl:block")}>NexusPlay</span>
+          <Link href="/" className={cn("flex items-center group/logo transition-opacity duration-200", isCollapsed && "group-hover/header:opacity-0")}>
+            {isCollapsed ? (
+              <Logo imageClassName="h-8" />
+            ) : (
+              <Logo className="hidden xl:flex" imageClassName="h-8" />
+            )}
           </Link>
 
           <Tooltip>

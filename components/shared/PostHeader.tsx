@@ -31,7 +31,7 @@ export default function PostHeader({ post, onEditClick }: PostHeaderProps) {
     id: 'unknown',
     username: 'anonymous',
     avatarUrl: undefined,
-    first_name: 'NexusPlay',
+    first_name: 'ReelTube',
     last_name: 'User',
     isVerified: false,
   };

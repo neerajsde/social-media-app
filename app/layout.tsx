@@ -15,8 +15,31 @@ const plusJakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "NexusPlay - Connect, Share, and Discover",
+  title: {
+    template: "%s | ReelTube",
+    default: "ReelTube - Connect, Share, and Discover",
+  },
   description: "A premium next-generation social media platform for real-time engagement, collaborative posting, and media discovery.",
+  openGraph: {
+    type: "website",
+    siteName: "ReelTube",
+    title: "ReelTube - Connect, Share, and Discover",
+    description: "A premium next-generation social media platform for real-time engagement, collaborative posting, and media discovery.",
+    images: [
+      {
+        url: "/images/logo.png",
+        width: 800,
+        height: 800,
+        alt: "ReelTube Logo",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary",
+    title: "ReelTube - Connect, Share, and Discover",
+    description: "A premium next-generation social media platform for real-time engagement.",
+    images: ["/images/logo.png"],
+  },
 };
 
 export default function RootLayout({

@@ -40,7 +40,7 @@ export default function SharePostDialog({ postId, open, onOpenChange }: SharePos
       try {
         await navigator.share({
           title: 'Check out this post',
-          text: 'Check out this premium post on NexusPlay!',
+          text: 'Check out this premium post on ReelTube!',
           url: link,
         });
         await shareExternally(postId).unwrap();

@@ -163,13 +163,18 @@ export default function RightSidebar() {
           {/* ─── Footer ─── */}
           <div className="px-5 py-4 mt-auto">
             <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-[11px] text-muted-foreground/35">
-              {['Terms', 'Privacy', 'Cookies', 'About'].map((item) => (
-                <Link key={item} href="#" className="hover:text-muted-foreground/60 transition-colors">
-                  {item}
+              {[
+                { name: 'Terms', href: '/terms' },
+                { name: 'Privacy', href: '/privacy' },
+                { name: 'Cookies', href: '/cookies' },
+                { name: 'About', href: '/about' }
+              ].map((item) => (
+                <Link key={item.name} href={item.href} className="hover:text-muted-foreground/60 transition-colors">
+                  {item.name}
                 </Link>
               ))}
             </div>
-            <p className="text-[11px] text-muted-foreground/25 mt-1.5">NexusPlay &copy; {new Date().getFullYear()}</p>
+            <p className="text-[11px] text-muted-foreground/25 mt-1.5">ReelTube &copy; {new Date().getFullYear()}</p>
           </div>
         </div>
       </aside>

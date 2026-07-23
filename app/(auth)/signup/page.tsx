@@ -2,8 +2,9 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Logo from '@/components/shared/Logo';
 import { useRouter } from 'next/navigation';
-import { Eye, EyeOff, UserPlus, TrendingUp, ArrowLeft, Check, X } from 'lucide-react';
+import { Eye, EyeOff, UserPlus, ArrowLeft, Check, X } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -67,11 +68,8 @@ export default function SignupPage() {
   return (
     <div className="w-full max-w-md">
       <div className="mb-8 text-center">
-        <Link href="/" className="inline-flex items-center gap-2 mb-6">
-          <div className="w-10 h-10 rounded-xl bg-brand-dark flex items-center justify-center">
-            <TrendingUp className="w-5 h-5 text-brand-lightest" />
-          </div>
-          <span className="text-xl font-bold">NexusPlay</span>
+        <Link href="/" className="inline-flex justify-center mb-6">
+          <Logo imageClassName="h-12" />
         </Link>
       </div>
 
@@ -168,7 +166,7 @@ export default function SignupPage() {
             <div className="flex items-start gap-2">
               <Checkbox id="terms" checked={acceptTerms} onCheckedChange={(c) => setAcceptTerms(!!c)} className="mt-0.5" />
               <Label htmlFor="terms" className="text-sm font-normal leading-snug">
-                I agree to the <Link href="#" className="text-brand-dark dark:text-brand-medium hover:underline">Terms of Service</Link> and <Link href="#" className="text-brand-dark dark:text-brand-medium hover:underline">Privacy Policy</Link>
+                I agree to the <Link href="/terms" className="text-brand-dark dark:text-brand-medium hover:underline" target="_blank" rel="noopener noreferrer">Terms of Service</Link> and <Link href="/privacy" className="text-brand-dark dark:text-brand-medium hover:underline" target="_blank" rel="noopener noreferrer">Privacy Policy</Link>
               </Label>
             </div>
             {errors.terms && <p className="text-xs text-destructive">{errors.terms}</p>}

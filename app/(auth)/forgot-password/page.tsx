@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Mail, ArrowLeft, TrendingUp, CheckCircle } from 'lucide-react';
+import Logo from '@/components/shared/Logo';
+import { Mail, ArrowLeft, CheckCircle } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -31,11 +32,8 @@ export default function ForgotPasswordPage() {
   return (
     <div className="w-full max-w-md">
       <div className="mb-8 text-center">
-        <Link href="/" className="inline-flex items-center gap-2 mb-6">
-          <div className="w-10 h-10 rounded-xl bg-brand-dark flex items-center justify-center">
-            <TrendingUp className="w-5 h-5 text-brand-lightest" />
-          </div>
-          <span className="text-xl font-bold">NexusPlay</span>
+        <Link href="/" className="inline-flex justify-center mb-6">
+          <Logo imageClassName="h-12" />
         </Link>
       </div>
 
