@@ -72,9 +72,27 @@ export const userApi = baseApi.injectEndpoints({
     }),
     getFollowers: builder.query<{ success: boolean; data: { items: any[]; total: number } }, { userId: string; page?: number; limit?: number }>({
       query: ({ userId, page = 1, limit = 20 }) => `/user/${userId}/followers?page=${page}&limit=${limit}`,
+      transformResponse: (response: any) => {
+        return {
+          success: response.success,
+          data: {
+            items: response.followers || [],
+            total: response.meta?.totalCount || 0
+          }
+        };
+      },
     }),
     getFollowing: builder.query<{ success: boolean; data: { items: any[]; total: number } }, { userId: string; page?: number; limit?: number }>({
       query: ({ userId, page = 1, limit = 20 }) => `/user/${userId}/following?page=${page}&limit=${limit}`,
+      transformResponse: (response: any) => {
+        return {
+          success: response.success,
+          data: {
+            items: response.following || [],
+            total: response.meta?.totalCount || 0
+          }
+        };
+      },
     }),
     isFollowing: builder.query<{ success: boolean; isFollowing: boolean }, string>({
       query: (userId) => `/user/${userId}/is-following`,

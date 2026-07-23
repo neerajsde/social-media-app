@@ -122,10 +122,21 @@ export default function ReelVideo({ src, isActive, className, ...props }: ReelVi
   const toggleFullscreen = (e?: React.MouseEvent) => {
     e?.stopPropagation();
     if (containerRef.current) {
-      if (!document.fullscreenElement) {
-        containerRef.current.requestFullscreen();
+      if (!document.fullscreenElement && !(document as any).webkitFullscreenElement) {
+        if (containerRef.current.requestFullscreen) {
+          containerRef.current.requestFullscreen().catch((err) => console.log(err));
+        } else if ((containerRef.current as any).webkitRequestFullscreen) {
+          (containerRef.current as any).webkitRequestFullscreen();
+        } else if (videoRef.current && (videoRef.current as any).webkitEnterFullscreen) {
+          // iOS Safari fallback
+          (videoRef.current as any).webkitEnterFullscreen();
+        }
       } else {
-        document.exitFullscreen();
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        } else if ((document as any).webkitExitFullscreen) {
+          (document as any).webkitExitFullscreen();
+        }
       }
     }
   };
@@ -152,6 +163,8 @@ export default function ReelVideo({ src, isActive, className, ...props }: ReelVi
         controls={false}
         loop
         playsInline
+        // @ts-ignore
+        webkit-playsinline="true"
         muted={isMuted}
       >
         {children}

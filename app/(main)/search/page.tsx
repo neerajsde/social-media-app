@@ -6,10 +6,12 @@ import Link from 'next/link';
 import { Search as SearchIcon, X, Users, FileText, Hash, Clock, Loader2, TrendingUp } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import ListSkeleton from '@/components/skeletons/ListSkeleton';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import PostCard from '@/components/shared/PostCard';
+import UserListCard from '@/components/shared/UserListCard';
 import { formatCount } from '@/lib/mock-data';
 import { useAppSelector, useDebouncedValue } from '@/lib/hooks';
 import {
@@ -192,8 +194,8 @@ function SearchPageContent() {
                   <span>Recent</span>
                 </div>
                 {recentLoading ? (
-                  <div className="flex justify-center py-4">
-                    <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+                  <div className="py-2">
+                    <ListSkeleton count={4} />
                   </div>
                 ) : (
                   recentSearches.map((item) => (
@@ -230,8 +232,8 @@ function SearchPageContent() {
                 <span>Trending now</span>
               </div>
               {trendingLoading ? (
-                <div className="flex justify-center py-4">
-                  <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+                <div className="py-2">
+                  <ListSkeleton count={5} />
                 </div>
               ) : trending.length > 0 ? (
                 trending.map((item) => (
@@ -259,8 +261,8 @@ function SearchPageContent() {
             </div>
           </div>
         ) : isSearching ? (
-          <div className="flex justify-center py-16">
-            <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+          <div className="py-4 px-2">
+            <ListSkeleton count={6} />
           </div>
         ) : (
           <>
@@ -272,28 +274,7 @@ function SearchPageContent() {
                   </h3>
                 )}
                 {users.map((user) => (
-                  <Card key={user.id} className="border-border/50">
-                    <CardContent className="p-3 flex items-center gap-3">
-                      <Link href={`/profile/${user.username}`}>
-                        <Avatar className="w-10 h-10">
-                          <AvatarImage src={user.avatarUrl} />
-                          <AvatarFallback>{user.first_name?.[0] || user.username[0]}</AvatarFallback>
-                        </Avatar>
-                      </Link>
-                      <div className="flex-1 min-w-0">
-                        <Link
-                          href={`/profile/${user.username}`}
-                          className="text-sm font-medium hover:underline"
-                        >
-                          {user.first_name} {user.last_name}
-                        </Link>
-                        <p className="text-xs text-muted-foreground truncate">@{user.username}</p>
-                      </div>
-                      <Button variant="outline" size="sm" className="h-7 text-xs rounded-full">
-                        Follow
-                      </Button>
-                    </CardContent>
-                  </Card>
+                  <UserListCard key={user.id} user={user} />
                 ))}
               </div>
             )}

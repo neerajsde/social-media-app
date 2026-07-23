@@ -9,6 +9,7 @@ import { Separator } from '@/components/ui/separator';
 import { timeAgo } from '@/lib/utils';
 import Link from 'next/link';
 import { useNotifications } from '@/hooks/useNotifications';
+import ListSkeleton from '@/components/skeletons/ListSkeleton';
 import { AppNotification } from '@/lib/features/notification/notificationApi';
 
 export default function NotificationsPage() {
@@ -90,7 +91,9 @@ export default function NotificationsPage() {
 
       <div className="p-4 space-y-3">
         {isLoading ? (
-          <div className="text-center py-20 text-muted-foreground">Loading...</div>
+          <div className="py-4">
+            <ListSkeleton count={8} />
+          </div>
         ) : notifications.length > 0 ? (
           notifications.map((notif) => (
             <Card 

@@ -11,6 +11,7 @@ import {
   useDislikePostMutation, 
   useBookmarkPostMutation 
 } from '@/lib/features/post/postApi';
+import { useFollowUserMutation, useUnfollowUserMutation } from '@/lib/features/user/userApi';
 import { useAppSelector } from '@/lib/hooks';
 import { toast } from 'sonner';
 
@@ -29,16 +30,22 @@ export default function ReelCard({
   onShareClick,
   onAuthRequired
 }: ReelCardProps) {
-  const { isAuthenticated } = useAppSelector((state) => state.auth);
+  const { isAuthenticated, user: currentUser } = useAppSelector((state) => state.auth);
+  
+  const author = post.author || post.user;
+  const isPostOwner = post.isOwnPost || author?.id === currentUser?.id;
   
   const [liked, setLiked] = useState(post.isLiked || false);
   const [likeCount, setLikeCount] = useState((post as any).likeCount || post.likesCount || 0);
   const [bookmarked, setBookmarked] = useState(post.isBookmarked || false);
   const [showHeartAnim, setShowHeartAnim] = useState(false);
+  const [isFollowing, setIsFollowing] = useState(post.isFollowingAuthor || false);
 
   const [likePost] = useLikePostMutation();
   const [dislikePost] = useDislikePostMutation();
   const [bookmarkPost] = useBookmarkPostMutation();
+  const [followUser] = useFollowUserMutation();
+  const [unfollowUser] = useUnfollowUserMutation();
 
   const lastTapRef = useRef<number>(0);
 
@@ -61,7 +68,7 @@ export default function ReelCard({
     const newLikedState = forceLike ? true : !wasLiked;
 
     setLiked(newLikedState);
-    setLikeCount(c => newLikedState ? c + 1 : Math.max(0, c - 1));
+    setLikeCount((c: number) => newLikedState ? c + 1 : Math.max(0, c - 1));
 
     if (newLikedState) setShowHeartAnim(true);
 
@@ -96,6 +103,29 @@ export default function ReelCard({
     }
   };
 
+  const handleFollowToggle = async () => {
+    if (!isAuthenticated) {
+      onAuthRequired();
+      return;
+    }
+    const authorId = post.author?.id || post.user?.id;
+    if (!authorId) return;
+
+    try {
+      if (isFollowing) {
+        await unfollowUser(authorId).unwrap();
+        setIsFollowing(false);
+        toast.success(`Unfollowed @${post.author?.username || post.user?.username}`);
+      } else {
+        await followUser(authorId).unwrap();
+        setIsFollowing(true);
+        toast.success(`Followed @${post.author?.username || post.user?.username}`);
+      }
+    } catch {
+      toast.error('Failed to update follow status');
+    }
+  };
+
   const handleDoubleClick = (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent other events if necessary
     handleLikeToggle(true);
@@ -112,7 +142,13 @@ export default function ReelCard({
         poster={post.video?.thumbnail || ''}
       />
 
-      <ReelInfo post={post} />
+      <ReelInfo 
+        post={post} 
+        isFollowing={isFollowing}
+        followsYou={(post as any).followsYouAuthor}
+        isOwner={isPostOwner}
+        onFollow={handleFollowToggle}
+      />
 
       <ReelActions 
         liked={liked}

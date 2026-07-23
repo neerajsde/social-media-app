@@ -149,8 +149,11 @@ export default function PostCard({ post, showMedia = true }: PostCardProps) {
     ) {
       return;
     }
-    
-    router.push(`/post/${post.id}`);
+    if (post.postType === 'video' || post.postType === 'reel') {
+      router.push(`/reels?id=${post.id}`);
+    } else {
+      router.push(`/post/${post.id}`);
+    }
   };
 
   return (

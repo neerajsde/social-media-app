@@ -7,6 +7,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
+import { useMediaQuery } from '@/hooks/use-media-query';
+import ListSkeleton from '@/components/skeletons/ListSkeleton';
+import MessageSkeleton from '@/components/skeletons/MessageSkeleton';
 import SharedPostCard from '@/components/shared/SharedPostCard';
 import { useGetConversationsQuery, useGetMessagesQuery, useSendMessageMutation, useMarkConversationAsReadMutation } from '@/lib/features/chat/chatApi';
 import { useSearchQuery } from '@/lib/features/search/searchApi';
@@ -143,8 +146,8 @@ export default function MessagesPage() {
         <div className="flex-1 overflow-hidden">
           <ScrollArea className="h-full">
             {convsLoading ? (
-              <div className="flex justify-center p-10">
-                <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+              <div className="px-4 py-4">
+                <ListSkeleton count={8} />
               </div>
             ) : (
               <div className="px-2 pb-2 space-y-0.5">
@@ -219,8 +222,8 @@ export default function MessagesPage() {
                       People
                     </p>
                     {isSearching ? (
-                      <div className="flex justify-center py-4">
-                        <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
+                      <div className="px-4 py-2">
+                        <ListSkeleton count={3} />
                       </div>
                     ) : globalUsers.length === 0 ? (
                       <p className="text-xs text-center text-muted-foreground/50 py-3">No users found</p>
@@ -306,9 +309,7 @@ export default function MessagesPage() {
               <ScrollArea className="h-full">
                 <div className="px-5 py-6 max-w-3xl mx-auto">
                   {msgsLoading ? (
-                    <div className="flex justify-center py-16">
-                      <Loader2 className="w-5 h-5 animate-spin text-muted-foreground/40" />
-                    </div>
+                    <MessageSkeleton count={6} />
                   ) : messages.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-20 text-center">
                       <div className="w-14 h-14 rounded-2xl bg-[#1a1a1a] flex items-center justify-center mb-4">

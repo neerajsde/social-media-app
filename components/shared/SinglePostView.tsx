@@ -148,34 +148,38 @@ export default function SinglePostView({ post }: SinglePostViewProps) {
   const totalComments = commentsResponse?.total || post.commentsCount || commentsList.length || 0;
   const hasMoreComments = commentsList.length < totalComments;
 
+  const hasMedia = (post.images && post.images.length > 0) || post.video || post.mediaUrl || post.thumbnailUrl;
+
   return (
     <>
-      <div className="w-full max-w-2xl mx-auto flex flex-col min-h-screen bg-transparent md:py-6">
+      <div className="w-full max-w-3xl mx-auto flex flex-col min-h-screen bg-transparent md:py-8">
         {/* Navigation header for Mobile */}
-        <div className="sticky top-0 z-30 flex items-center gap-3 border-b border-white/5 bg-[#0a0a0a]/80 px-4 py-3 backdrop-blur-xl md:hidden">
+        <div className="sticky top-0 z-40 flex items-center gap-3 border-b border-white/10 bg-black/60 px-4 py-3 backdrop-blur-2xl md:hidden">
           <Link href="/" aria-label="Back to feed">
-            <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full hover:bg-white/10">
-              <ArrowLeft className="h-4.5 w-4.5" />
+            <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full hover:bg-white/10 active:scale-95 transition-transform">
+              <ArrowLeft className="h-5 w-5 text-white" />
             </Button>
           </Link>
-          <h1 className="text-lg font-bold font-heading tracking-tight">Post Details</h1>
+          <h1 className="text-xl font-bold tracking-tight text-white">Post Details</h1>
         </div>
 
         {/* Main Post Card Container */}
-        <div className="flex flex-col bg-[#111111] border-y md:border border-white/5 md:rounded-3xl shadow-2xl overflow-hidden mb-8">
+        <div className="flex flex-col bg-[#0a0a0a] md:bg-[#111111] md:border border-white/10 md:rounded-[2rem] shadow-2xl overflow-hidden md:mb-8 ring-1 ring-white/5 md:ring-0">
           
           {/* Post Header */}
-          <PostHeader post={post} />
+          <div className="pt-2 md:pt-4 px-2 md:px-4">
+            <PostHeader post={post} />
+          </div>
 
           {/* Caption & tags */}
-          <div className="px-4 pb-3 space-y-2">
+          <div className="px-5 md:px-8 pb-5 space-y-3 mt-1">
             {post.content && (
-              <div className="text-sm sm:text-base leading-relaxed text-foreground/95 break-words">
+              <div className="text-[15px] sm:text-[17px] leading-[1.6] text-white/90 break-words font-normal">
                 <ReactMarkdown 
                   remarkPlugins={[remarkGfm]}
                   components={{
-                    a: ({node, ...props}) => <a className="text-brand-dark dark:text-brand-medium hover:underline font-medium" {...props} />,
-                    p: ({node, ...props}) => <p className="whitespace-pre-wrap mb-2 last:mb-0" {...props} />
+                    a: ({node, ...props}) => <a className="text-[#05a85c] hover:text-[#06c26a] hover:underline font-medium transition-colors" {...props} />,
+                    p: ({node, ...props}) => <p className="whitespace-pre-wrap mb-3 last:mb-0" {...props} />
                   }}
                 >
                   {post.content}
@@ -183,9 +187,9 @@ export default function SinglePostView({ post }: SinglePostViewProps) {
               </div>
             )}
             {post.tags && post.tags.length > 0 && (
-              <div className="flex flex-wrap gap-1.5 pt-1">
+              <div className="flex flex-wrap gap-2 pt-2">
                 {post.tags.map((tag) => (
-                  <Link key={tag} href={`/search?q=${tag}`} className="text-xs text-[#05a85c] hover:underline font-medium">
+                  <Link key={tag} href={`/search?q=${tag}`} className="text-[14px] px-3 py-1 rounded-full bg-white/5 hover:bg-white/10 text-white/80 hover:text-white transition-colors font-medium">
                     #{tag}
                   </Link>
                 ))}
@@ -194,39 +198,43 @@ export default function SinglePostView({ post }: SinglePostViewProps) {
           </div>
 
           {/* Media Player */}
-          <div className="w-full flex items-center justify-center bg-black border-y border-white/5 relative">
-            <div className="w-full py-2">
-              <PostMedia post={post} onDoubleLike={handleLikeToggle} />
+          {hasMedia && (
+            <div className="w-full flex items-center justify-center bg-black/50 border-y border-white/5 relative mt-2">
+              <div className="w-full relative">
+                <PostMedia post={post} onDoubleLike={handleLikeToggle} />
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Actions */}
-          <PostActions
-            post={post}
-            liked={liked}
-            likeCount={likeCount}
-            onLikeToggle={handleLikeToggle}
-            bookmarked={bookmarked}
-            onBookmarkToggle={handleBookmarkToggle}
-            onCommentClick={() => {
-              const el = document.getElementById('comment-input');
-              el?.focus();
-            }}
-            onShareClick={handleShareClick}
-          />
+          <div className="px-2 md:px-4 py-1">
+            <PostActions
+              post={post}
+              liked={liked}
+              likeCount={likeCount}
+              onLikeToggle={handleLikeToggle}
+              bookmarked={bookmarked}
+              onBookmarkToggle={handleBookmarkToggle}
+              onCommentClick={() => {
+                const el = document.getElementById('comment-input');
+                el?.focus();
+              }}
+              onShareClick={handleShareClick}
+            />
+          </div>
 
-          <div className="h-[1px] bg-white/5 w-full" />
+          <div className="h-[1px] bg-white/10 w-full" />
 
           {/* Comments Section */}
-          <div className="flex flex-col w-full">
-            <div className="px-5 py-4 border-b border-white/5 bg-[#111111]">
-              <h3 className="text-xs font-bold text-white/50 uppercase tracking-widest">
-                Comments ({totalComments})
+          <div className="flex flex-col w-full bg-[#0a0a0a] md:bg-transparent">
+            <div className="px-6 py-5 border-b border-white/5">
+              <h3 className="text-[13px] font-bold text-white/60 uppercase tracking-[0.15em]">
+                Comments <span className="ml-1 text-white/40 font-medium">({totalComments})</span>
               </h3>
             </div>
             
             {/* Scrollable comments container */}
-            <div className="px-2 sm:px-4 py-4 w-full bg-[#111111]">
+            <div className="px-4 sm:px-6 py-6 w-full min-h-[300px]">
               <CommentSection
                 comments={commentsList}
                 postId={post.id}
@@ -239,8 +247,8 @@ export default function SinglePostView({ post }: SinglePostViewProps) {
             </div>
 
             {/* Comment Input */}
-            <div className="sticky bottom-0 p-4 border-t border-white/5 bg-[#0a0a0a]/90 backdrop-blur-2xl">
-              <div id="comment-input-container">
+            <div className="sticky bottom-0 p-4 sm:p-6 border-t border-white/10 bg-[#0a0a0a]/95 md:bg-[#111111]/95 backdrop-blur-2xl">
+              <div id="comment-input-container" className="max-w-2xl mx-auto">
                 <CommentInput onSubmit={handleCommentSubmit} autoFocus={false} />
               </div>
             </div>

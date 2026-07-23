@@ -74,12 +74,10 @@ export default function ReelActions({
 
       {/* More */}
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <button className="flex flex-col items-center gap-1 group outline-none mt-2">
-            <div className="bg-black/20 p-2 rounded-full backdrop-blur-md group-hover:bg-black/40 transition-colors">
-              <MoreVertical className="w-5 h-5 text-white" />
-            </div>
-          </button>
+        <DropdownMenuTrigger className="flex flex-col items-center gap-1 group outline-none mt-2">
+          <div className="bg-black/20 p-2 rounded-full backdrop-blur-md group-hover:bg-black/40 transition-colors">
+            <MoreVertical className="w-5 h-5 text-white" />
+          </div>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="bg-[#111111] border-white/10 text-white w-40">
           <DropdownMenuItem onClick={onReport} className="text-red-500 focus:text-red-500 focus:bg-white/5 cursor-pointer">

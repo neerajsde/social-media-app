@@ -311,7 +311,7 @@ export default function ProfilePage({ params }: { params: Promise<{ username: st
             <h1 className="text-lg font-bold tracking-tight text-white/90 flex items-center gap-1.5 leading-tight">
               {user.first_name || user.username} {user.last_name || ''}
               {user.isVerified && (
-                <span className="text-brand-medium inline-block" title="Verified Creator">
+                <span className="text-blue-500 inline-block" title="Verified Creator">
                   <svg className="w-4.5 h-4.5" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
                   </svg>
@@ -388,7 +388,7 @@ export default function ProfilePage({ params }: { params: Promise<{ username: st
             <h2 className="text-xl font-bold flex items-center gap-1.5 text-foreground">
               {user.first_name || user.username} {user.last_name || ''}
               {user.isVerified && (
-                <span className="text-brand-medium">
+                <span className="text-blue-500">
                   <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
                   </svg>
@@ -415,7 +415,7 @@ export default function ProfilePage({ params }: { params: Promise<{ username: st
               onClick={handleFollowToggle}
               className="rounded-full font-semibold px-5 text-xs"
             >
-              {isFollowingState ? 'Following' : 'Follow'}
+              {isFollowingState ? 'Following' : user.followsYou ? 'Follow Back' : 'Follow'}
             </Button>
           )}
         </div>

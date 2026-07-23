@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ImageIcon, Video as VideoIcon, Globe, Users, Lock, Sparkles, Hash, Loader2, X, FileText, Music, UploadCloud } from 'lucide-react';
+import { ImageIcon, Video as VideoIcon, Globe, Users, Lock, Sparkles, Hash, Loader2, X, FileText, Music, UploadCloud, PlusSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';

@@ -127,7 +127,7 @@ export default function RightSidebar() {
                             {user.first_name} {user.last_name}
                           </Link>
                           {user.isVerified && (
-                            <svg className="w-3.5 h-3.5 text-brand-medium shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                            <svg className="w-3.5 h-3.5 text-blue-500 shrink-0" viewBox="0 0 24 24" fill="currentColor">
                               <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
                             </svg>
                           )}
@@ -144,7 +144,7 @@ export default function RightSidebar() {
                             : 'bg-brand-dark hover:bg-brand-dark/90 text-white border-0'
                         )}
                       >
-                        {isFollowed ? 'Following' : 'Follow'}
+                        {isFollowed ? 'Following' : user.followsYou ? 'Follow Back' : 'Follow'}
                       </Button>
                     </div>
                   );

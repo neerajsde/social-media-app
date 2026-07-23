@@ -148,6 +148,11 @@ export default function PostHeader({ post, onEditClick }: PostHeaderProps) {
                   <UserMinus className="w-3.5 h-3.5 mr-1" />
                   Following
                 </>
+              ) : (post as any).followsYouAuthor ? (
+                <>
+                  <UserPlus className="w-3.5 h-3.5 mr-1" />
+                  Follow Back
+                </>
               ) : (
                 <>
                   <UserPlus className="w-3.5 h-3.5 mr-1" />

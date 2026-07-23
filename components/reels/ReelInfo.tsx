@@ -13,10 +13,14 @@ interface ReelInfoProps {
   post: Post;
   onFollow?: () => void;
   isFollowing?: boolean;
+  followsYou?: boolean;
+  isOwner?: boolean;
 }
 
-export default function ReelInfo({ post, onFollow, isFollowing }: ReelInfoProps) {
+export default function ReelInfo({ post, onFollow, isFollowing, followsYou, isOwner }: ReelInfoProps) {
   const [expanded, setExpanded] = useState(false);
+
+  const author = post.author || post.user;
 
   const truncatedCaption = post.content 
     ? post.content.length > 60 && !expanded 
@@ -29,35 +33,42 @@ export default function ReelInfo({ post, onFollow, isFollowing }: ReelInfoProps)
       <div className="flex flex-col gap-3">
         
         {/* User Info */}
-        <div className="flex items-center gap-2">
-          <Link href={`/profile/${post.user.id}`}>
-            <Avatar className="w-10 h-10 border border-white/20 hover:border-white/50 transition-colors">
-              <AvatarImage src={post.user.avatarUrl || ''} />
-              <AvatarFallback className="bg-[#222222] text-white">
-                {post.user.first_name?.[0] || post.user.username[0]}
-              </AvatarFallback>
-            </Avatar>
-          </Link>
+        {author && (
           <div className="flex items-center gap-2">
-            <Link href={`/profile/${post.user.id}`} className="text-white font-semibold text-[15px] hover:underline shadow-sm">
-              {post.user.username}
+            <Link href={`/profile/${author.id}`}>
+              <Avatar className="w-10 h-10 border border-white/20 hover:border-white/50 transition-colors">
+                <AvatarImage src={author.avatarUrl || ''} />
+                <AvatarFallback className="bg-[#222222] text-white">
+                  {author.first_name?.[0] || author.username[0]}
+                </AvatarFallback>
+              </Avatar>
             </Link>
-            
-            {!isFollowing && (
-              <>
-                <span className="w-1 h-1 bg-white/50 rounded-full" />
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="h-6 px-2 text-white font-semibold hover:bg-white/10 hover:text-white"
-                  onClick={onFollow}
-                >
-                  Follow
-                </Button>
-              </>
-            )}
+            <div className="flex items-center gap-1.5">
+              <Link href={`/profile/${author.id}`} className="text-white font-semibold text-[15px] hover:underline shadow-sm">
+                {author.username}
+              </Link>
+              {author.isVerified && (
+                <svg className="w-3.5 h-3.5 text-blue-500 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
+                </svg>
+              )}
+              
+              {!isFollowing && !isOwner && (
+                <>
+                  <span className="w-1 h-1 bg-white/50 rounded-full ml-1" />
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-6 px-2 text-white font-semibold hover:bg-white/10 hover:text-white ml-0.5"
+                    onClick={onFollow}
+                  >
+                    {followsYou ? 'Follow Back' : 'Follow'}
+                  </Button>
+                </>
+              )}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Caption */}
         {post.content && (
@@ -93,8 +104,8 @@ export default function ReelInfo({ post, onFollow, isFollowing }: ReelInfoProps)
           <Music className="w-4 h-4 text-white shrink-0 shadow-sm" />
           <div className="relative overflow-hidden w-[200px] flex group">
             <div className="whitespace-nowrap text-sm text-white font-medium drop-shadow-md flex animate-[marquee_5s_linear_infinite] group-hover:[animation-play-state:paused]">
-              <span className="mr-8">{post.reel?.musicName || "Original audio"}</span>
-              <span className="mr-8">{post.reel?.musicName || "Original audio"}</span>
+              <span className="mr-8">{post.musicName || "Original audio"}</span>
+              <span className="mr-8">{post.musicName || "Original audio"}</span>
             </div>
           </div>
         </div>

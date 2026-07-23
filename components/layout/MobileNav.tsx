@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Search, MessageCircle, Bell, User, Compass, PlaySquare } from 'lucide-react';
+import { Home, Search, MessageCircle, Bell, User, Compass, PlaySquare, Plus } from 'lucide-react';
 import { useAppSelector } from '@/lib/hooks';
 import { cn } from '@/lib/utils';
 import { useGetChatUnreadCountQuery } from '@/lib/features/chat/chatApi';
@@ -24,42 +24,53 @@ export default function MobileNav() {
   const chatUnreadCount = chatData?.count || 0;
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-t border-border safe-area-inset-bottom">
-      <div className="flex items-center justify-around h-14">
-        {mobileNavItems.map(({ href, icon: Icon, label, auth: requiresAuth }) => {
-          if (requiresAuth && !isAuthenticated) {
-            if (label === 'Message') return null;
+    <>
+      {/* Floating Action Button for Create Post (Hidden on desktop or when already on create page) */}
+      {pathname !== '/create' && (
+        <Link 
+          href={isAuthenticated ? '/create' : '/login'}
+          className="md:hidden fixed bottom-20 right-4 z-50 w-14 h-14 bg-[#00D084] text-black rounded-full flex items-center justify-center shadow-[0_4px_20px_rgba(0,208,132,0.4)] transition-transform hover:scale-105 active:scale-95"
+        >
+          <Plus className="w-7 h-7" />
+        </Link>
+      )}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-t border-border safe-area-inset-bottom">
+        <div className="flex items-center justify-around h-14">
+          {mobileNavItems.map(({ href, icon: Icon, label, auth: requiresAuth }) => {
+            if (requiresAuth && !isAuthenticated) {
+              if (label === 'Message') return null;
+              return (
+                <Link key={href} href="/login" className="flex flex-col items-center gap-0.5 px-3 py-1.5 text-muted-foreground">
+                  <Icon className="w-5 h-5" />
+                  <span className="text-[10px] font-medium">{label}</span>
+                </Link>
+              );
+            }
+
+            const profileHref = label === 'Profile' && user ? `/profile/${user.username}` : href;
+            const isActive = pathname === profileHref || pathname === href;
+
             return (
-              <Link key={href} href="/login" className="flex flex-col items-center gap-0.5 px-3 py-1.5 text-muted-foreground">
-                <Icon className="w-5 h-5" />
+              <Link
+                key={href}
+                href={profileHref}
+                className={cn(
+                  'flex flex-col items-center gap-0.5 px-3 py-1.5 transition-colors relative',
+                  isActive ? 'text-brand-dark dark:text-brand-medium' : 'text-muted-foreground',
+                )}
+              >
+                <div className="relative">
+                  <Icon className="w-5 h-5" />
+                  {href === '/messages' && chatUnreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-destructive rounded-full border-2 border-background" />
+                  )}
+                </div>
                 <span className="text-[10px] font-medium">{label}</span>
               </Link>
             );
-          }
-
-          const profileHref = label === 'Profile' && user ? `/profile/${user.username}` : href;
-          const isActive = pathname === profileHref || pathname === href;
-
-          return (
-            <Link
-              key={href}
-              href={profileHref}
-              className={cn(
-                'flex flex-col items-center gap-0.5 px-3 py-1.5 transition-colors relative',
-                isActive ? 'text-brand-dark dark:text-brand-medium' : 'text-muted-foreground',
-              )}
-            >
-              <div className="relative">
-                <Icon className="w-5 h-5" />
-                {href === '/messages' && chatUnreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-destructive rounded-full border-2 border-background" />
-                )}
-              </div>
-              <span className="text-[10px] font-medium">{label}</span>
-            </Link>
-          );
-        })}
-      </div>
-    </nav>
+          })}
+        </div>
+      </nav>
+    </>
   );
 }
