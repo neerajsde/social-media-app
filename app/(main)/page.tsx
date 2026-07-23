@@ -1,11 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import PostCard from '@/components/shared/PostCard';
 import PostSkeleton from '@/components/shared/PostSkeleton';
+import VideoUploadBanner from '@/components/shared/VideoUploadBanner';
 import {
   Sparkles,
   Clock,
@@ -17,14 +18,15 @@ import {
   Users,
   MessageCircle,
   Bell,
+  Home,
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { useAppSelector } from '@/lib/hooks';
 import { toast } from 'sonner';
 import { useGetFeedQuery, useCreatePostMutation } from '@/lib/features/post/postApi';
-import { useGetUnreadCountQuery as useGetNotificationsUnreadCountQuery } from '@/lib/features/notification/notificationApi';
-import { useGetUnreadCountQuery as useGetChatUnreadCountQuery } from '@/lib/features/chat/chatApi';
+import { useGetNotificationUnreadCountQuery as useGetNotificationsUnreadCountQuery } from '@/lib/features/notification/notificationApi';
+import { useGetChatUnreadCountQuery } from '@/lib/features/chat/chatApi';
 import { normalizeFeedPost } from '@/lib/post-utils';
 import type { FeedType, Post } from '@/lib/types';
 
@@ -111,36 +113,55 @@ export default function HomePage() {
     router.push(`/create?type=${type}`);
   };
 
-  const handleLoadMore = () => {
-    if (hasMore && !isFetching) setPage((p) => p + 1);
-  };
+  const observer = useRef<IntersectionObserver | null>(null);
+  const lastElementRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      if (isFetching) return;
+      if (observer.current) observer.current.disconnect();
+      observer.current = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting && hasMore) {
+          setPage((p) => p + 1);
+        }
+      });
+      if (node) observer.current.observe(node);
+    },
+    [isFetching, hasMore]
+  );
 
   const handleTabChange = (value: string) => {
     setActiveTab(value as FeedType);
   };
 
   return (
-    <div className="w-full max-w-2xl border-r border-border/40 min-h-screen">
-      {/* Header */}
-      <div className="sticky top-0 z-20 bg-background/85 backdrop-blur-xl">
-        <div className="px-3 sm:px-4 py-3 flex items-center justify-between">
-          <h1 className="text-base sm:text-lg font-bold font-heading tracking-tight">Home</h1>
+    <div className="w-full max-w-2xl border-x border-white/5 bg-[#111111] min-h-screen">
+      {/* Premium Interactive Header */}
+      <div 
+        className="sticky top-0 z-20 bg-[#111111]/80 backdrop-blur-2xl border-b border-white/5 cursor-pointer hover:bg-[#111111]/90 transition-all duration-300 group/header"
+        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+      >
+        <div className="px-4 py-3 sm:py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-full bg-white/5 group-hover/header:bg-white/10 flex items-center justify-center transition-colors">
+              <Home className="w-4.5 h-4.5 text-white/90" />
+            </div>
+            <h1 className="text-lg sm:text-xl font-bold font-heading tracking-tight text-white/90">Home</h1>
+          </div>
           <div className="flex items-center gap-1.5 md:hidden">
             {isAuthenticated && (
               <>
                 <Link href="/notifications">
-                  <Button variant="ghost" size="icon" className="w-8 h-8 rounded-full relative hover:bg-accent/60">
-                    <Bell className="w-5 h-5 text-foreground/80" />
+                  <Button variant="ghost" size="icon" className="w-9 h-9 rounded-full relative hover:bg-white/10">
+                    <Bell className="w-5 h-5 text-white/80" />
                     {unreadCount > 0 && (
-                      <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-destructive rounded-full border-2 border-background" />
+                      <span className="absolute top-1 right-1 w-2 h-2 bg-[#f31260] rounded-full border border-[#111111]" />
                     )}
                   </Button>
                 </Link>
                 <Link href="/messages">
-                  <Button variant="ghost" size="icon" className="w-8 h-8 rounded-full relative hover:bg-accent/60">
-                    <MessageCircle className="w-5 h-5 text-foreground/80" />
+                  <Button variant="ghost" size="icon" className="w-9 h-9 rounded-full relative hover:bg-white/10">
+                    <MessageCircle className="w-5 h-5 text-white/80" />
                     {chatUnreadCount > 0 && (
-                      <span className="absolute top-0 right-0 w-2.5 h-2.5 bg-brand-dark dark:bg-brand-medium rounded-full border-2 border-background" />
+                      <span className="absolute top-1 right-1 w-2 h-2 bg-brand-medium rounded-full border border-[#111111]" />
                     )}
                   </Button>
                 </Link>
@@ -168,9 +189,11 @@ export default function HomePage() {
         </Tabs>
       </div>
 
+      <VideoUploadBanner />
+
       {/* Feed Composer */}
       {isAuthenticated && user && (
-        <div className="p-4 mb-4 mx-3 sm:mx-4 border border-border/20 bg-card rounded-2xl flex gap-3 shadow-sm">
+        <div className="p-4 mt-4 mx-3 sm:mx-4 border border-border/20 bg-card rounded-2xl flex gap-3 shadow-sm">
           <Avatar className="w-9 h-9 sm:w-10 sm:h-10 border border-border shrink-0">
             <AvatarImage src={user.avatarUrl} alt={user.username} />
             <AvatarFallback className="bg-brand-medium/20 text-brand-dark text-xs">
@@ -295,23 +318,13 @@ export default function HomePage() {
             ))}
 
             {hasMore && (
-              <div className="flex justify-center pt-2 pb-4">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleLoadMore}
-                  disabled={isFetching}
-                  className="w-full sm:w-auto min-w-[140px] gap-2"
-                >
-                  {isFetching ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      Loading...
-                    </>
-                  ) : (
-                    'Load more'
-                  )}
-                </Button>
+              <div ref={lastElementRef} className="flex justify-center pt-4 pb-8">
+                {isFetching && (
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    <span>Loading more...</span>
+                  </div>
+                )}
               </div>
             )}
           </>

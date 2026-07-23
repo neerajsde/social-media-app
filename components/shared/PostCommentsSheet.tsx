@@ -24,11 +24,11 @@ export default function PostCommentsSheet({ postId, open, onOpenChange }: PostCo
         </SheetHeader>
         <div className="flex-1 overflow-y-auto min-h-0 px-4 py-4">
           <CommentSection
-            comments={Array.isArray(data?.data) ? data.data : (data?.data?.comments || [])}
+            comments={Array.isArray(data?.data) ? data.data : ((data?.data as any)?.comments || [])}
             postId={postId}
             isLoading={isLoading}
             isFetching={isFetching}
-            totalComments={data?.data?.pagination?.total || data?.total || 0}
+            totalComments={((data?.data as any)?.pagination?.total) || (data as any)?.total || 0}
             onLoadMore={() => {}}
             hasMore={false}
           />

@@ -18,7 +18,7 @@ export default function RightSidebar() {
   const { isAuthenticated } = useAppSelector((state) => state.auth);
 
   const { data: trendingData, isLoading: isLoadingTags } = useGetTrendingTagsQuery({ limit: 10 });
-  const { data: suggestedData, isLoading: isLoadingUsers } = useGetSuggestedUsersQuery({ limit: 10 }, { skip: !isAuthenticated }); // or fetch always
+  const { data: suggestedData, isLoading: isLoadingUsers } = useGetSuggestedUsersQuery({ limit: 10 }, { skip: !isAuthenticated });
 
   const tags = trendingData?.tags || [];
   const users = suggestedData?.users || [];
@@ -45,125 +45,137 @@ export default function RightSidebar() {
 
   return (
     <>
-      <aside className="hidden lg:flex flex-col w-[320px] shrink-0 sticky top-0 h-screen overflow-y-auto py-4 pr-4 pl-3 gap-4">
+      <aside className="hidden lg:flex flex-col w-[248px] shrink-0 sticky top-0 h-screen overflow-y-auto border-l border-border/40 bg-[#1a1a1a]">
+        {/* Inner content with padding */}
+        <div className="flex flex-col gap-0 flex-1">
 
-        {/* Trending Topics */}
-        <div className="rounded-2xl border border-border/50 bg-card/50 backdrop-blur-md overflow-hidden">
-          <div className="flex items-center gap-2.5 px-4 py-3.5 border-b border-border/40 bg-gradient-to-r from-brand-dark/8 to-transparent">
-            <div className="w-7 h-7 rounded-lg bg-brand-dark/10 dark:bg-brand-medium/15 flex items-center justify-center">
-              <TrendingUp className="w-3.5 h-3.5 text-brand-dark dark:text-brand-medium" />
+          {/* ─── Trending Topics ─── */}
+          <div className="border-b border-border/30">
+            <div className="flex items-center gap-2.5 px-5 py-3.5">
+              <TrendingUp className="w-4 h-4 text-brand-medium shrink-0" />
+              <h2 className="text-sm font-bold text-foreground tracking-tight">Trending Topics</h2>
             </div>
-            <h2 className="text-sm font-bold text-foreground">Trending Topics</h2>
-          </div>
-          <div className="p-3 space-y-0.5 max-h-[240px] overflow-y-auto overscroll-contain">
-            {isLoadingTags ? (
-              <div className="py-8 text-center text-xs text-muted-foreground">Loading tags...</div>
-            ) : tags.length > 0 ? (
-              tags.map(({ tag, postCount }: { tag: string; postCount: number }, index: number) => (
-                <Link
-                  key={tag}
-                  href={`/search?q=${tag}&type=tags`}
-                  className="group flex items-center justify-between rounded-xl px-3 py-2.5 hover:bg-accent/50 transition-colors"
-                >
-                  <div className="flex items-center gap-2.5">
-                    <span className="text-xs font-bold text-muted-foreground/50 w-4 text-right tabular-nums">{index + 1}</span>
-                    <div>
-                      <div className="flex items-center gap-1">
-                        <Hash className="w-3 h-3 text-brand-medium shrink-0" />
-                        <span className="text-sm font-semibold text-foreground group-hover:text-brand-dark dark:group-hover:text-brand-medium transition-colors">{tag}</span>
-                      </div>
-                      <p className="text-[10px] text-muted-foreground mt-0.5">{formatCount(postCount)} posts</p>
-                    </div>
-                  </div>
-                  <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/40 group-hover:text-brand-medium group-hover:translate-x-0.5 transition-all" />
-                </Link>
-              ))
-            ) : (
-              <div className="py-8 text-center text-xs text-muted-foreground">No trending tags</div>
-            )}
-          </div>
-          <div className="px-4 py-2.5 border-t border-border/40 bg-accent/20">
-            <Link href="/explore" className="text-xs font-semibold text-brand-dark dark:text-brand-medium hover:underline">
-              View all trending &rarr;
-            </Link>
-          </div>
-        </div>
-
-        {/* Who to Follow */}
-        <div className="rounded-2xl border border-border/50 bg-card/50 backdrop-blur-md overflow-hidden">
-          <div className="flex items-center gap-2.5 px-4 py-3.5 border-b border-border/40 bg-gradient-to-r from-brand-dark/8 to-transparent">
-            <div className="w-7 h-7 rounded-lg bg-brand-dark/10 dark:bg-brand-medium/15 flex items-center justify-center">
-              <UserPlus className="w-3.5 h-3.5 text-brand-dark dark:text-brand-medium" />
-            </div>
-            <h2 className="text-sm font-bold text-foreground">Who to Follow</h2>
-          </div>
-          <div className="p-3 space-y-1 max-h-[240px] overflow-y-auto overscroll-contain">
-            {isLoadingUsers ? (
-              <div className="py-8 text-center text-xs text-muted-foreground">Loading users...</div>
-            ) : users.length > 0 ? (
-              users.map((user: any) => {
-                const isFollowed = followedUsers.has(user.id);
-                return (
-                  <div
-                    key={user.id}
-                    className="group flex items-center gap-3 rounded-xl px-3 py-2.5 hover:bg-accent/50 transition-colors"
+            <div className="max-h-[260px] overflow-y-auto overscroll-contain">
+              {isLoadingTags ? (
+                <div className="py-8 text-center text-xs text-muted-foreground/50">Loading...</div>
+              ) : tags.length > 0 ? (
+                tags.map(({ tag, postCount }: { tag: string; postCount: number }, index: number) => (
+                  <Link
+                    key={tag}
+                    href={`/search?q=${tag}&type=tags`}
+                    className="group flex items-center justify-between px-5 py-2.5 hover:bg-[#252525] transition-colors"
                   >
-                    <Link href={`/profile/${user.username}`} className="shrink-0">
-                      <Avatar className="w-9 h-9 ring-2 ring-border/50 group-hover:ring-brand-medium/50 transition-all">
-                        <AvatarImage src={user.avatarUrl} alt={user.username} />
-                        <AvatarFallback className="bg-gradient-to-br from-brand-dark/20 to-brand-medium/20 text-brand-dark dark:text-brand-medium text-xs font-bold uppercase">
-                          {user.first_name?.[0] || user.username?.[0]}
-                        </AvatarFallback>
-                      </Avatar>
-                    </Link>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-1">
-                        <Link href={`/profile/${user.username}`} className="text-sm font-semibold hover:text-brand-dark dark:hover:text-brand-medium truncate block transition-colors leading-tight">
-                          {user.first_name} {user.last_name}
-                        </Link>
-                        {user.isVerified && (
-                          <svg className="w-3.5 h-3.5 text-brand-dark dark:text-brand-medium shrink-0" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
-                          </svg>
-                        )}
+                    <div className="flex items-center gap-3 min-w-0">
+                      <span className="text-[11px] font-bold text-muted-foreground/30 w-3 text-right tabular-nums shrink-0">
+                        {index + 1}
+                      </span>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1">
+                          <Hash className="w-3 h-3 text-brand-medium/70 shrink-0" />
+                          <span className="text-sm font-semibold text-foreground/90 group-hover:text-brand-medium transition-colors truncate">
+                            {tag}
+                          </span>
+                        </div>
+                        <p className="text-[10px] text-muted-foreground/50 mt-0.5">{formatCount(postCount)} posts</p>
                       </div>
-                      <p className="text-xs text-muted-foreground truncate">@{user.username}</p>
                     </div>
-                    <Button
-                      size="sm"
-                      variant={isFollowed ? 'secondary' : 'outline'}
-                      onClick={() => handleFollowClick(user.id, user.username)}
-                      className={cn(
-                        'h-7 text-xs rounded-full shrink-0 font-semibold transition-all duration-200',
-                        isFollowed
-                          ? 'bg-brand-dark/10 text-brand-dark dark:bg-brand-medium/20 dark:text-brand-medium border-brand-dark/20'
-                          : 'border-brand-dark/30 text-brand-dark hover:bg-brand-dark hover:text-white dark:border-brand-medium/30 dark:text-brand-medium dark:hover:bg-brand-medium dark:hover:text-brand-darkest'
-                      )}
-                    >
-                      {isFollowed ? 'Following' : 'Follow'}
-                    </Button>
-                  </div>
-                );
-              })
-            ) : (
-              <div className="py-8 text-center text-xs text-muted-foreground">No suggestions</div>
-            )}
+                    <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/20 group-hover:text-brand-medium/60 group-hover:translate-x-0.5 transition-all shrink-0" />
+                  </Link>
+                ))
+              ) : (
+                <div className="py-8 text-center text-xs text-muted-foreground/40">No trending tags</div>
+              )}
+            </div>
+            <div className="px-5 py-2.5">
+              <Link href="/explore" className="text-xs font-semibold text-brand-medium/80 hover:text-brand-medium transition-colors">
+                View all trending →
+              </Link>
+            </div>
           </div>
-          <div className="px-4 py-2.5 border-t border-border/40 bg-accent/20">
-            <Link href="/explore" className="text-xs font-semibold text-brand-dark dark:text-brand-medium hover:underline">
-              Show more &rarr;
-            </Link>
-          </div>
-        </div>
 
-        {/* Footer */}
-        <div className="px-2 text-[11px] text-muted-foreground/60 space-y-1">
-          <div className="flex flex-wrap gap-x-2 gap-y-0.5">
-            {['Terms', 'Privacy', 'Cookies', 'About'].map((item) => (
-              <Link key={item} href="#" className="hover:text-muted-foreground transition-colors hover:underline">{item}</Link>
-            ))}
+          {/* ─── Who to Follow ─── */}
+          <div className="border-b border-border/30">
+            <div className="flex items-center gap-2.5 px-5 py-3.5">
+              <UserPlus className="w-4 h-4 text-brand-medium shrink-0" />
+              <h2 className="text-sm font-bold text-foreground tracking-tight">Who to Follow</h2>
+            </div>
+            <div className="max-h-[280px] overflow-y-auto overscroll-contain">
+              {isLoadingUsers ? (
+                <div className="py-8 text-center text-xs text-muted-foreground/50">Loading...</div>
+              ) : users.length > 0 ? (
+                users.map((user: any) => {
+                  const isFollowed = followedUsers.has(user.id);
+                  return (
+                    <div
+                      key={user.id}
+                      className="group flex items-center gap-3 px-5 py-2.5 hover:bg-[#252525] transition-colors"
+                    >
+                      <Link href={`/profile/${user.username}`} className="shrink-0">
+                        <Avatar className="w-9 h-9 ring-1 ring-border/30 group-hover:ring-brand-medium/40 transition-all">
+                          <AvatarImage src={user.avatarUrl} alt={user.username} />
+                          <AvatarFallback className="bg-[#252525] text-brand-medium text-xs font-semibold uppercase">
+                            {user.first_name?.[0] || user.username?.[0]}
+                          </AvatarFallback>
+                        </Avatar>
+                      </Link>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-1">
+                          <Link
+                            href={`/profile/${user.username}`}
+                            className="text-sm font-semibold text-foreground/90 hover:text-brand-medium truncate block transition-colors leading-tight"
+                          >
+                            {user.first_name} {user.last_name}
+                          </Link>
+                          {user.isVerified && (
+                            <svg className="w-3.5 h-3.5 text-blue-500 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                              <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
+                            </svg>
+                          )}
+                        </div>
+                        <p className="text-[11px] text-muted-foreground/50 truncate">@{user.username}</p>
+                      </div>
+                      <Button
+                        size="sm"
+                        onClick={() => handleFollowClick(user.id, user.username)}
+                        className={cn(
+                          'h-7 text-[11px] rounded-full shrink-0 font-semibold px-4 transition-all duration-200',
+                          isFollowed
+                            ? 'bg-[#252525] text-foreground/70 hover:bg-[#2a2a2a] border border-border/30'
+                            : 'bg-brand-dark hover:bg-brand-dark/90 text-white border-0'
+                        )}
+                      >
+                        {isFollowed ? 'Following' : user.followsYou ? 'Follow Back' : 'Follow'}
+                      </Button>
+                    </div>
+                  );
+                })
+              ) : (
+                <div className="py-8 text-center text-xs text-muted-foreground/40">No suggestions</div>
+              )}
+            </div>
+            <div className="px-5 py-2.5">
+              <Link href="/explore" className="text-xs font-semibold text-brand-medium/80 hover:text-brand-medium transition-colors">
+                Show more →
+              </Link>
+            </div>
           </div>
-          <p>NexusPlay &copy; {new Date().getFullYear()}</p>
+
+          {/* ─── Footer ─── */}
+          <div className="px-5 py-4 mt-auto">
+            <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-[11px] text-muted-foreground/35">
+              {[
+                { name: 'Terms', href: '/terms' },
+                { name: 'Privacy', href: '/privacy' },
+                { name: 'Cookies', href: '/cookies' },
+                { name: 'About', href: '/about' }
+              ].map((item) => (
+                <Link key={item.name} href={item.href} className="hover:text-muted-foreground/60 transition-colors">
+                  {item.name}
+                </Link>
+              ))}
+            </div>
+            <p className="text-[11px] text-muted-foreground/25 mt-1.5">ReelTube &copy; {new Date().getFullYear()}</p>
+          </div>
         </div>
       </aside>
       <AuthDialog open={showAuthDialog} onOpenChange={setShowAuthDialog} />

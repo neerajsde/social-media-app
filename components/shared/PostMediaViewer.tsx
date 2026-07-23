@@ -4,12 +4,13 @@ import { useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { getMediaUrl } from '@/lib/media-url';
 import type { Post } from '@/lib/types';
+import HlsVideoPlayer from './HlsVideoPlayer';
 
 export default function PostMediaViewer({ post }: { post: Post }) {
   const [activeIndex, setActiveIndex] = useState(0);
   const touchStartX = useRef<number | null>(null);
   const images = post.images ?? [];
-  const videoUrl = post.video?.originalVideo || post.video?.hlsMasterKey || post.mediaUrl;
+  const videoUrl = post.video?.hlsMasterKey || post.video?.originalVideo || post.mediaUrl;
 
   if (images.length > 0) {
     const goTo = (index: number) => setActiveIndex((index + images.length) % images.length);
@@ -80,15 +81,16 @@ export default function PostMediaViewer({ post }: { post: Post }) {
 
   if (videoUrl) {
     return (
-      <video
-        src={getMediaUrl(videoUrl)}
+      <HlsVideoPlayer
+        src={getMediaUrl(videoUrl) || ''}
         poster={getMediaUrl(post.video?.thumbnail || post.thumbnailUrl)}
         controls
         playsInline
+        autoPlayOnScroll={true}
         className="aspect-video max-h-[75vh] w-full rounded-xl bg-black"
       >
         Your browser does not support video playback.
-      </video>
+      </HlsVideoPlayer>
     );
   }
 

@@ -31,7 +31,7 @@ export default function PostHeader({ post, onEditClick }: PostHeaderProps) {
     id: 'unknown',
     username: 'anonymous',
     avatarUrl: undefined,
-    first_name: 'NexusPlay',
+    first_name: 'ReelTube',
     last_name: 'User',
     isVerified: false,
   };
@@ -101,7 +101,7 @@ export default function PostHeader({ post, onEditClick }: PostHeaderProps) {
 
   return (
     <>
-      <div className="flex items-center justify-between gap-3 p-3 sm:p-4 border-b border-border/10 bg-card rounded-t-xl">
+      <div className="flex items-center justify-between gap-3 p-3 sm:p-4 border-b border-white/5 bg-transparent">
         <div className="flex items-center gap-3 min-w-0">
           <Link href={`/profile/${author.username}`} className="shrink-0">
             <Avatar className="w-10 h-10 ring-1 ring-border/20 hover:ring-border/40 transition-all duration-200">
@@ -147,6 +147,11 @@ export default function PostHeader({ post, onEditClick }: PostHeaderProps) {
                 <>
                   <UserMinus className="w-3.5 h-3.5 mr-1" />
                   Following
+                </>
+              ) : (post as any).followsYouAuthor ? (
+                <>
+                  <UserPlus className="w-3.5 h-3.5 mr-1" />
+                  Follow Back
                 </>
               ) : (
                 <>

@@ -61,7 +61,7 @@ export default function CommentItem({ comment, postId }: CommentItemProps) {
     id: 'unknown',
     username: 'anonymous',
     avatarUrl: undefined,
-    first_name: 'NexusPlay',
+    first_name: 'ReelTube',
     last_name: 'User',
     isVerified: false,
   };

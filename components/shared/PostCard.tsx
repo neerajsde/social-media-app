@@ -149,15 +149,18 @@ export default function PostCard({ post, showMedia = true }: PostCardProps) {
     ) {
       return;
     }
-    
-    router.push(`/post/${post.id}`);
+    if (post.postType === 'video' || post.postType === 'reel') {
+      router.push(`/reels?id=${post.id}`);
+    } else {
+      router.push(`/post/${post.id}`);
+    }
   };
 
   return (
     <>
       <Card 
         onClick={handleCardClick}
-        className="border-border/20 shadow-sm hover:shadow-md transition-all duration-300 bg-card rounded-2xl overflow-hidden cursor-pointer"
+        className="border-white/5 bg-transparent hover:bg-white/[0.02] transition-all duration-300 rounded-2xl overflow-hidden cursor-pointer"
       >
         <CardContent className="p-0">
           {/* Header */}

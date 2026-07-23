@@ -6,10 +6,12 @@ import Link from 'next/link';
 import { Search as SearchIcon, X, Users, FileText, Hash, Clock, Loader2, TrendingUp } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import ListSkeleton from '@/components/skeletons/ListSkeleton';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import PostCard from '@/components/shared/PostCard';
+import UserListCard from '@/components/shared/UserListCard';
 import { formatCount } from '@/lib/mock-data';
 import { useAppSelector, useDebouncedValue } from '@/lib/hooks';
 import {
@@ -136,16 +138,19 @@ function SearchPageContent() {
   };
 
   return (
-    <div className="w-full max-w-2xl border-r border-border/40 min-h-screen">
-      <div className="sticky top-0 z-20 bg-background/80 backdrop-blur-xl border-b border-border p-4 space-y-3">
-        <div className="relative">
-          <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+    <div className="w-full max-w-2xl border-x border-white/5 bg-[#111111] min-h-screen pb-16 md:pb-0">
+      {/* Sticky Search Header */}
+      <div 
+        className="sticky top-0 z-20 bg-[#111111]/80 backdrop-blur-2xl border-b border-white/5 p-3 sm:p-4 space-y-3 cursor-pointer hover:bg-[#111111]/90 transition-all duration-300 group/header"
+        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+      >
+        <div className="relative" onClick={(e) => e.stopPropagation()}>
+          <SearchIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-muted-foreground" />
           <Input
             placeholder="Search posts, people, tags..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="pl-10 pr-10"
-            autoFocus
+            className="pl-10 h-10 sm:h-11 bg-white/5 border-white/10 focus:border-brand-medium rounded-full text-sm placeholder:text-muted-foreground/70"
           />
           {query && (
             <Button
@@ -189,8 +194,8 @@ function SearchPageContent() {
                   <span>Recent</span>
                 </div>
                 {recentLoading ? (
-                  <div className="flex justify-center py-4">
-                    <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+                  <div className="py-2">
+                    <ListSkeleton count={4} />
                   </div>
                 ) : (
                   recentSearches.map((item) => (
@@ -227,8 +232,8 @@ function SearchPageContent() {
                 <span>Trending now</span>
               </div>
               {trendingLoading ? (
-                <div className="flex justify-center py-4">
-                  <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+                <div className="py-2">
+                  <ListSkeleton count={5} />
                 </div>
               ) : trending.length > 0 ? (
                 trending.map((item) => (
@@ -256,8 +261,8 @@ function SearchPageContent() {
             </div>
           </div>
         ) : isSearching ? (
-          <div className="flex justify-center py-16">
-            <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+          <div className="py-4 px-2">
+            <ListSkeleton count={6} />
           </div>
         ) : (
           <>
@@ -269,28 +274,7 @@ function SearchPageContent() {
                   </h3>
                 )}
                 {users.map((user) => (
-                  <Card key={user.id} className="border-border/50">
-                    <CardContent className="p-3 flex items-center gap-3">
-                      <Link href={`/profile/${user.username}`}>
-                        <Avatar className="w-10 h-10">
-                          <AvatarImage src={user.avatarUrl} />
-                          <AvatarFallback>{user.first_name?.[0] || user.username[0]}</AvatarFallback>
-                        </Avatar>
-                      </Link>
-                      <div className="flex-1 min-w-0">
-                        <Link
-                          href={`/profile/${user.username}`}
-                          className="text-sm font-medium hover:underline"
-                        >
-                          {user.first_name} {user.last_name}
-                        </Link>
-                        <p className="text-xs text-muted-foreground truncate">@{user.username}</p>
-                      </div>
-                      <Button variant="outline" size="sm" className="h-7 text-xs rounded-full">
-                        Follow
-                      </Button>
-                    </CardContent>
-                  </Card>
+                  <UserListCard key={user.id} user={user} />
                 ))}
               </div>
             )}

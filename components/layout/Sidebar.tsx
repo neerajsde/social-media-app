@@ -6,24 +6,27 @@ import { useState } from 'react';
 import {
   Home, Search, Bell, MessageCircle, Bookmark, User,
   Settings, PlusSquare, TrendingUp, LogOut, Compass, MoreHorizontal,
-  PanelLeftClose, PanelLeftOpen, Menu
+  PanelLeftClose, PanelLeftOpen, Menu, PlaySquare, Users
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useAppSelector, useAppDispatch } from '@/lib/hooks';
 import { cn } from '@/lib/utils';
+import Logo from '@/components/shared/Logo';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { logout } from '@/lib/features/auth/authSlice';
 import { toggleSidebar } from '@/lib/features/ui/uiSlice';
 import { toast } from 'sonner';
-import { useGetUnreadCountQuery as useGetNotificationsUnreadCountQuery } from '@/lib/features/notification/notificationApi';
-import { useGetUnreadCountQuery as useGetChatUnreadCountQuery } from '@/lib/features/chat/chatApi';
+import { useGetNotificationUnreadCountQuery as useGetNotificationsUnreadCountQuery } from '@/lib/features/notification/notificationApi';
+import { useGetChatUnreadCountQuery } from '@/lib/features/chat/chatApi';
 
 const navItems = [
   { href: '/', icon: Home, label: 'Home' },
   { href: '/explore', icon: Compass, label: 'Explore' },
+  { href: '/reels', icon: PlaySquare, label: 'Reels' },
   { href: '/search', icon: Search, label: 'Search' },
+  { href: '/suggested', icon: Users, label: 'Suggested Users', auth: true },
   { href: '/notifications', icon: Bell, label: 'Notifications', auth: true },
   { href: '/messages', icon: MessageCircle, label: 'Messages', auth: true },
   { href: '/saved', icon: Bookmark, label: 'Saved', auth: true },
@@ -49,16 +52,20 @@ export default function Sidebar() {
   return (
     <TooltipProvider delay={0}>
       <aside className={cn(
-        "sticky top-0 h-screen border-r border-border/40 flex flex-col bg-background/98 backdrop-blur-xl z-30 shrink-0 transition-all duration-300",
+        "sticky top-0 h-screen border-r border-border/40 flex flex-col bg-[#1a1a1a] z-30 shrink-0 transition-all duration-300",
         isCollapsed ? "w-[68px]" : "w-[68px] xl:w-[248px]"
       )}>
         {/* Logo and Toggle Header */}
         <div className={cn("h-16 flex items-center border-b border-border/40 transition-all duration-300 group/header relative", isCollapsed ? "justify-center px-0" : "px-3 xl:px-5 justify-between")}>
-          <Link href="/" className={cn("flex items-center gap-3 group/logo transition-opacity duration-200", isCollapsed && "group-hover/header:opacity-0")}>
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-dark to-brand-medium flex items-center justify-center shadow-lg shadow-brand-dark/30 group-hover/logo:shadow-brand-dark/50 transition-shadow shrink-0">
-              <TrendingUp className="w-4 h-4 text-white" />
-            </div>
-            <span className={cn("text-lg font-bold text-foreground tracking-tight transition-all duration-300", isCollapsed ? "hidden" : "hidden xl:block")}>NexusPlay</span>
+          <Link href="/" className={cn("flex items-center group/logo transition-opacity duration-200", isCollapsed && "group-hover/header:opacity-0")}>
+            {isCollapsed ? (
+              <Logo imageClassName="h-8" collapsed={true} />
+            ) : (
+              <>
+                <Logo className="xl:hidden" imageClassName="h-8" collapsed={true} />
+                <Logo className="hidden xl:flex" imageClassName="h-8" />
+              </>
+            )}
           </Link>
 
           <Tooltip>
@@ -94,7 +101,10 @@ export default function Sidebar() {
                   <Link
                     href={href}
                     className={cn(
-                      'group relative flex items-center gap-3.5 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200',
+                      'group relative flex items-center rounded-xl py-2.5 text-sm font-medium transition-all duration-200',
+                      isCollapsed 
+                        ? 'justify-center px-0' 
+                        : 'justify-center px-0 xl:justify-start xl:px-3 xl:gap-3.5',
                       isActive
                         ? 'bg-brand-dark/10 dark:bg-brand-medium/12 text-brand-dark dark:text-brand-medium ring-1 ring-brand-dark/10 dark:ring-brand-medium/10'
                         : 'text-muted-foreground hover:bg-accent/50 hover:text-foreground'
@@ -103,7 +113,7 @@ export default function Sidebar() {
                 }>
                   {/* Active left accent bar */}
                   {isActive && (
-                    <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-6 bg-brand-dark dark:bg-brand-medium rounded-r-full" />
+                    <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-brand-dark dark:bg-brand-medium rounded-r-full" />
                   )}
                   <Icon className={cn(
                     'w-5 h-5 shrink-0 transition-transform duration-200 group-hover:scale-110',
@@ -113,22 +123,34 @@ export default function Sidebar() {
                     {label}
                   </span>
                   
-                  {href === '/notifications' && unreadCount > 0 && !isCollapsed && (
-                    <span className="hidden xl:flex ml-auto items-center justify-center min-w-[20px] h-5 px-1.5 text-[11px] font-bold text-white bg-destructive rounded-full">
+                  {href === '/notifications' && unreadCount > 0 && (
+                    <span className={cn(
+                      "ml-auto items-center justify-center min-w-[20px] h-5 px-1.5 text-[11px] font-bold text-white bg-destructive rounded-full",
+                      isCollapsed ? "hidden" : "hidden xl:flex"
+                    )}>
                       {unreadCount > 99 ? '99+' : unreadCount}
                     </span>
                   )}
-                  {href === '/notifications' && unreadCount > 0 && isCollapsed && (
-                    <span className="absolute top-1 right-2 w-2.5 h-2.5 bg-destructive rounded-full border-2 border-background" />
+                  {href === '/notifications' && unreadCount > 0 && (
+                    <span className={cn(
+                      "absolute top-1 right-2 w-2.5 h-2.5 bg-destructive rounded-full border-2 border-background",
+                      isCollapsed ? "block" : "block xl:hidden"
+                    )} />
                   )}
                   
-                  {href === '/messages' && chatUnreadCount > 0 && !isCollapsed && (
-                    <span className="hidden xl:flex ml-auto items-center justify-center min-w-[20px] h-5 px-1.5 text-[11px] font-bold text-white bg-brand-dark dark:bg-brand-medium rounded-full">
+                  {href === '/messages' && chatUnreadCount > 0 && (
+                    <span className={cn(
+                      "ml-auto items-center justify-center min-w-[20px] h-5 px-1.5 text-[11px] font-bold text-white bg-brand-dark dark:bg-brand-medium rounded-full",
+                      isCollapsed ? "hidden" : "hidden xl:flex"
+                    )}>
                       {chatUnreadCount > 99 ? '99+' : chatUnreadCount}
                     </span>
                   )}
-                  {href === '/messages' && chatUnreadCount > 0 && isCollapsed && (
-                    <span className="absolute top-1 right-2 w-2.5 h-2.5 bg-brand-dark dark:bg-brand-medium rounded-full border-2 border-background" />
+                  {href === '/messages' && chatUnreadCount > 0 && (
+                    <span className={cn(
+                      "absolute top-1 right-2 w-2.5 h-2.5 bg-brand-dark dark:bg-brand-medium rounded-full border-2 border-background",
+                      isCollapsed ? "block" : "block xl:hidden"
+                    )} />
                   )}
 
                 </TooltipTrigger>
@@ -146,7 +168,12 @@ export default function Sidebar() {
                 <TooltipTrigger render={
                   <Link
                     href="/create"
-                    className="group flex items-center gap-3.5 rounded-xl px-3 py-2.5 text-sm font-semibold bg-gradient-to-r from-brand-dark to-brand-medium text-white hover:opacity-90 active:scale-95 transition-all duration-200 shadow-md shadow-brand-dark/20"
+                    className={cn(
+                      "group flex items-center rounded-xl py-2.5 text-sm font-semibold bg-gradient-to-r from-brand-dark to-brand-medium text-white hover:opacity-90 active:scale-95 transition-all duration-200 shadow-md shadow-brand-dark/20",
+                      isCollapsed 
+                        ? "justify-center px-0" 
+                        : "justify-center px-0 xl:justify-start xl:px-3 xl:gap-3.5"
+                    )}
                   />
                 }>
                   <PlusSquare className="w-5 h-5 shrink-0 group-hover:rotate-90 transition-transform duration-300" />
@@ -173,7 +200,10 @@ export default function Sidebar() {
                   <Link
                     href={href}
                     className={cn(
-                      'relative flex items-center gap-3.5 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200',
+                      'relative flex items-center rounded-xl py-2.5 text-sm font-medium transition-all duration-200',
+                      isCollapsed 
+                        ? 'justify-center px-0' 
+                        : 'justify-center px-0 xl:justify-start xl:px-3 xl:gap-3.5',
                       isActive
                         ? 'bg-brand-dark/12 dark:bg-brand-medium/15 text-brand-dark dark:text-brand-medium'
                         : 'text-muted-foreground hover:bg-accent/60 hover:text-foreground'
@@ -193,7 +223,10 @@ export default function Sidebar() {
           {isAuthenticated && user ? (
             <DropdownMenu>
               <DropdownMenuTrigger render={
-                <button className="flex items-center gap-3 w-full rounded-xl px-2 py-2 hover:bg-accent/60 transition-colors text-left outline-none cursor-pointer mt-1">
+                <button className={cn(
+                  "flex items-center w-full rounded-xl py-2 hover:bg-accent/60 transition-colors text-left outline-none cursor-pointer mt-1",
+                  isCollapsed ? "justify-center px-0" : "justify-center px-0 xl:justify-start xl:px-2 xl:gap-3"
+                )}>
                   <Avatar className="w-8 h-8 shrink-0 ring-2 ring-brand-dark/20 dark:ring-brand-medium/30">
                     <AvatarImage src={user.avatarUrl} alt={user.username} />
                     <AvatarFallback className="bg-gradient-to-br from-brand-dark/30 to-brand-medium/30 text-brand-dark dark:text-brand-medium text-xs font-bold">

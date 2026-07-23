@@ -22,7 +22,7 @@ export default function AuthDialog({ open, onOpenChange, title, description }: A
           </div>
           <DialogTitle className="text-xl">{title || 'Sign in to continue'}</DialogTitle>
           <DialogDescription className="text-sm max-w-xs mx-auto">
-            {description || 'Join NexusPlay to like posts, leave comments, follow creators, and connect with the community.'}
+            {description || 'Join ReelTube to like posts, leave comments, follow creators, and connect with the community.'}
           </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col gap-3 mt-4">

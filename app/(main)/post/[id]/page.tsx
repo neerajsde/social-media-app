@@ -15,15 +15,15 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
   const post = data?.data ? normalizeFeedPost(data.data as unknown as Record<string, unknown>) : undefined;
 
   return (
-    <div className="w-full min-h-screen bg-background">
+    <div className="w-full max-w-2xl border-x border-white/5 bg-[#0a0a0a] min-h-screen pb-20">
       {/* Navigation Header for Desktop */}
-      <div className="hidden md:flex sticky top-0 z-20 items-center gap-3 border-b border-border bg-background/80 px-4 py-3 backdrop-blur-xl">
+      <div className="hidden md:flex sticky top-0 z-30 items-center gap-3 border-b border-white/5 bg-[#0a0a0a]/80 px-4 py-3 backdrop-blur-xl">
         <Link href="/" aria-label="Back to feed">
-          <Button variant="ghost" size="icon" className="h-8 w-8">
-            <ArrowLeft className="h-4 w-4" />
+          <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full hover:bg-white/10">
+            <ArrowLeft className="h-4.5 w-4.5" />
           </Button>
         </Link>
-        <h1 className="text-sm font-bold">Post Details</h1>
+        <h1 className="text-lg font-bold font-heading tracking-tight">Post Details</h1>
       </div>
 
       {isLoading && (

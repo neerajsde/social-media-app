@@ -5,8 +5,26 @@ export const postApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getFeed: builder.query<FeedResponse, { page?: number; limit?: number; type?: FeedType }>({
       query: ({ page = 1, limit = 10, type = 'foryou' }) =>
-        `/post/feed?page=${page}&limit=${limit}&type=${type}`,
-      providesTags: ['Feed'],
+        `/post/feed?page=${page}&limit=${limit}${type ? `&type=${type}` : ''}`,
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.data.map(({ id }: { id: string }) => ({ type: 'Feed' as const, id })),
+              { type: 'Feed', id: 'LIST' },
+            ]
+          : [{ type: 'Feed', id: 'LIST' }],
+    }),
+    getReels: builder.query<any, { page?: number; limit?: number }>({
+      query: ({ page = 1, limit = 10 }) => ({
+        url: `/post/feed?page=${page}&limit=${limit}&type=reels`,
+      }),
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.data.map(({ id }: { id: string }) => ({ type: 'Feed' as const, id })),
+              { type: 'Feed', id: 'REELS_LIST' },
+            ]
+          : [{ type: 'Feed', id: 'REELS_LIST' }],
     }),
     getUserPosts: builder.query<{ success: boolean; posts: Post[]; meta: any }, { userId: string; page?: number; limit?: number }>({
       query: ({ userId, page = 1, limit = 20 }) => `/post/user/${userId}?page=${page}&limit=${limit}`,
@@ -31,7 +49,7 @@ export const postApi = baseApi.injectEndpoints({
       query: ({ commentId, page = 1, limit = 10 }) => `/post/comment/${commentId}/replies?page=${page}&limit=${limit}`,
       providesTags: (_result, _err, { commentId }) => [{ type: 'Replies', id: commentId }],
     }),
-    createPost: builder.mutation<{ success: boolean; data: Post }, CreatePostRequest>({
+    createPost: builder.mutation<{ success: boolean; data?: Post; postId?: string }, CreatePostRequest>({
       query: (body) => ({
         url: '/post/',
         method: 'POST',
@@ -145,6 +163,7 @@ export const postApi = baseApi.injectEndpoints({
 
 export const {
   useGetFeedQuery,
+  useGetReelsQuery,
   useGetUserPostsQuery,
   useGetBookmarkedPostsQuery,
   useGetTrendingTagsQuery,
