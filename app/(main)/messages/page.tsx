@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Send, Search, MessageSquare, Phone, Video, Info, ArrowLeft, Loader2, PenSquare } from 'lucide-react';
+import { Send, Search, MessageSquare, Phone, Video, Info, ArrowLeft, Loader2, PenSquare, Trash2 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,11 +11,12 @@ import { useMediaQuery } from '@/hooks/use-media-query';
 import ListSkeleton from '@/components/skeletons/ListSkeleton';
 import MessageSkeleton from '@/components/skeletons/MessageSkeleton';
 import SharedPostCard from '@/components/shared/SharedPostCard';
-import { useGetConversationsQuery, useGetMessagesQuery, useSendMessageMutation, useMarkConversationAsReadMutation } from '@/lib/features/chat/chatApi';
+import { useGetConversationsQuery, useGetMessagesQuery, useSendMessageMutation, useMarkConversationAsReadMutation, useClearChatMutation } from '@/lib/features/chat/chatApi';
 import { useSearchQuery } from '@/lib/features/search/searchApi';
 import { useSelector } from 'react-redux';
 import type { RootState } from '@/lib/store';
 import { toast } from 'sonner';
+import { useSocket } from '@/components/providers/SocketProvider';
 
 export default function MessagesPage() {
   const currentUser = useSelector((state: RootState) => state.auth.user);
@@ -28,21 +29,53 @@ export default function MessagesPage() {
     { skip: searchQuery.length < 2 }
   );
 
-  const { data: conversationsData, isLoading: convsLoading } = useGetConversationsQuery(undefined, {
-    pollingInterval: 10000,
-  });
+  const { data: conversationsData, isLoading: convsLoading } = useGetConversationsQuery();
 
-  const { data: messagesData, isLoading: msgsLoading } = useGetMessagesQuery(activeConv?.id || '', {
-    skip: !activeConv?.id,
-    pollingInterval: 5000,
-  });
+  const { data: messagesData, isLoading: msgsLoading } = useGetMessagesQuery(
+    activeConv?.id || '',
+    { skip: !activeConv?.id || activeConv?.id?.startsWith('new-') }
+  );
 
   const [sendMessage, { isLoading: isSending }] = useSendMessageMutation();
   const [markAsRead] = useMarkConversationAsReadMutation();
+  const [clearChat, { isLoading: isClearing }] = useClearChatMutation();
+  const { socket } = useSocket();
+  const [isPeerTyping, setIsPeerTyping] = useState(false);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const activeConvRef = useRef<any>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Keep ref in sync with state so socket handlers don't get stale closures
+  activeConvRef.current = activeConv;
 
   const conversations = conversationsData?.data || [];
   const messages = messagesData?.data || [];
+
+  // Register socket listeners once — use ref to avoid stale closures
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleTyping = (data: any) => {
+      if (data.conversationId === activeConvRef.current?.id) {
+        setIsPeerTyping(data.isTyping);
+        // Auto-clear typing if isTyping=false
+        if (data.isTyping) {
+          if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+          typingTimeoutRef.current = setTimeout(() => setIsPeerTyping(false), 3000);
+        }
+      }
+    };
+
+    socket.on('typing_status', handleTyping);
+    return () => {
+      socket.off('typing_status', handleTyping);
+    };
+  }, [socket]);  // Only re-register when socket instance changes
+
+  // Reset typing indicator when switching conversations
+  useEffect(() => {
+    setIsPeerTyping(false);
+  }, [activeConv?.id]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -73,13 +106,43 @@ export default function MessagesPage() {
     e.preventDefault();
     if (!inputText.trim() || !activeConv || !participant) return;
     try {
-      await sendMessage({
+      const response = await sendMessage({
         receiverId: participant.id,
         content: inputText,
+        conversationId: activeConv.id,
       }).unwrap();
+      
+      if (activeConv.id.startsWith('new-')) {
+         setActiveConv({ ...activeConv, id: response.data.conversationId });
+      }
+      
       setInputText('');
     } catch (err) {
       toast.error('Failed to send message');
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInputText(e.target.value);
+    
+    if (socket && activeConv && participant && !activeConv.id.startsWith('new-')) {
+      socket.emit('typing', { conversationId: activeConv.id, receiverId: participant.id });
+      
+      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+      
+      typingTimeoutRef.current = setTimeout(() => {
+        socket.emit('stop_typing', { conversationId: activeConv.id, receiverId: participant.id });
+      }, 1500);
+    }
+  };
+
+  const handleClearChat = async () => {
+    if (!activeConv || activeConv.id.startsWith('new-') || !window.confirm('Are you sure you want to clear this chat?')) return;
+    try {
+      await clearChat(activeConv.id).unwrap();
+      toast.success('Chat cleared');
+    } catch (err) {
+      toast.error('Failed to clear chat');
     }
   };
 
@@ -183,8 +246,8 @@ export default function MessagesPage() {
                               {peer?.first_name?.[0] || peer?.username?.[0] || '?'}
                             </AvatarFallback>
                           </Avatar>
-                          {conv.unreadCount > 0 && (
-                            <span className="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full bg-brand-dark border-2 border-[#1a1a1a]" />
+                          {peer?.presence === 'online' && (
+                            <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-green-500 border-2 border-[#1a1a1a]" />
                           )}
                         </div>
                         <div className="flex-1 min-w-0">
@@ -203,8 +266,8 @@ export default function MessagesPage() {
                           </div>
                           {conv.lastMessage && (
                             <p className={cn(
-                              'text-xs truncate mt-0.5',
-                              conv.unreadCount > 0 ? 'text-foreground/70 font-medium' : 'text-muted-foreground/60'
+                              'text-xs truncate mt-0.5 font-medium',
+                              conv.unreadCount > 0 ? 'text-green-400' : 'text-muted-foreground/60'
                             )}>
                               {lastMessageContent}
                             </p>
@@ -283,12 +346,21 @@ export default function MessagesPage() {
                   </AvatarFallback>
                 </Avatar>
                 <div className="min-w-0">
-                  <h2 className="text-sm font-semibold truncate leading-tight">
+                  <h2 className="text-sm font-semibold truncate leading-tight flex items-center gap-1.5">
                     {participant.first_name || participant.last_name
                       ? `${participant.first_name || ''} ${participant.last_name || ''}`.trim()
                       : participant.username || 'Unknown User'}
+                    {participant.presence === 'online' && (
+                      <span className="w-2 h-2 rounded-full bg-green-500" title="Online" />
+                    )}
                   </h2>
-                  <p className="text-[11px] text-muted-foreground/60 truncate">@{participant.username || 'unknown'}</p>
+                  <p className="text-[11px] text-muted-foreground/60 truncate">
+                    {participant.presence === 'online' 
+                      ? 'Online' 
+                      : participant.lastSeenAt 
+                        ? `Last seen ${new Date(participant.lastSeenAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` 
+                        : `@${participant.username || 'unknown'}`}
+                  </p>
                 </div>
               </div>
               <div className="flex items-center gap-0.5 shrink-0">
@@ -298,8 +370,15 @@ export default function MessagesPage() {
                 <Button variant="ghost" size="icon" className="w-8 h-8 rounded-lg text-muted-foreground/70 hover:text-foreground">
                   <Video className="w-4 h-4" />
                 </Button>
-                <Button variant="ghost" size="icon" className="w-8 h-8 rounded-lg text-muted-foreground/70 hover:text-foreground">
-                  <Info className="w-4 h-4" />
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  onClick={handleClearChat}
+                  disabled={isClearing}
+                  className="w-8 h-8 rounded-lg text-muted-foreground/70 hover:text-red-500"
+                  title="Clear Chat"
+                >
+                  {isClearing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
                 </Button>
               </div>
             </div>
@@ -366,6 +445,23 @@ export default function MessagesPage() {
                           </div>
                         );
                       })}
+                      {isPeerTyping && (
+                        <div className="flex justify-start">
+                          <Avatar className="w-7 h-7 shrink-0 mr-2 mt-1 ring-1 ring-border/30">
+                            <AvatarImage src={participant.avatarUrl} />
+                            <AvatarFallback className="bg-[#252525] text-brand-medium text-[10px] font-semibold uppercase">
+                              {participant.first_name?.[0] || participant.username?.[0] || '?'}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="bg-[#1e1e1e] border border-border/30 rounded-2xl px-4 py-3 rounded-bl-md">
+                            <div className="flex gap-1">
+                              <span className="w-1.5 h-1.5 bg-muted-foreground/50 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
+                              <span className="w-1.5 h-1.5 bg-muted-foreground/50 rounded-full animate-bounce [animation-delay:-0.15s]"></span>
+                              <span className="w-1.5 h-1.5 bg-muted-foreground/50 rounded-full animate-bounce"></span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
                       <div ref={scrollRef} />
                     </div>
                   )}
@@ -379,7 +475,7 @@ export default function MessagesPage() {
                 <Input
                   placeholder="Type a message..."
                   value={inputText}
-                  onChange={(e) => setInputText(e.target.value)}
+                  onChange={handleInputChange}
                   className="flex-1 h-10 rounded-xl bg-[#252525] border-transparent text-sm placeholder:text-muted-foreground/40 focus-visible:ring-1 focus-visible:ring-brand-dark/40 focus-visible:border-brand-dark/30"
                   disabled={isSending}
                 />

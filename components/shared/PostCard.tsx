@@ -149,16 +149,20 @@ export default function PostCard({ post, showMedia = true }: PostCardProps) {
   const handleCardClick = (e: React.MouseEvent) => {
     const target = e.target as HTMLElement;
     
-    // Prevent navigation if clicking interactive elements (buttons, links, dialogs)
+    // Prevent navigation if clicking interactive elements (buttons, links, dialogs, media controls)
     if (
       target.closest('button') ||
       target.closest('a') ||
       target.tagName === 'A' ||
-      target.closest('[role="dialog"]')
+      target.closest('[role="dialog"]') ||
+      target.closest('[role="menuitem"]') ||
+      target.tagName === 'VIDEO' ||
+      target.closest('.video-controls') ||
+      target.closest('.slider-thumb') // just in case
     ) {
       return;
     }
-    if (post.postType === 'video' || post.postType === 'reel') {
+    if (post.postType === 'reel') {
       router.push(`/reels?id=${post.id}`);
     } else {
       router.push(`/post/${post.id}`);

@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import Hls from 'hls.js';
-import { Play, Pause, Volume2, VolumeX, Settings, Maximize } from 'lucide-react';
+import { Play, Pause, Volume2, VolumeX, Settings, Maximize, Rewind, FastForward, Loader2 } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 interface HlsVideoPlayerProps extends React.VideoHTMLAttributes<HTMLVideoElement> {
@@ -24,6 +24,7 @@ export default function HlsVideoPlayer({ src, className, autoPlayOnScroll, objec
   const [showControls, setShowControls] = useState(true);
   const [levels, setLevels] = useState<{ height: number; bitrate: number }[]>([]);
   const [currentLevel, setCurrentLevel] = useState(-1);
+  const [isBuffering, setIsBuffering] = useState(false);
 
   const formatTime = (timeInSeconds: number) => {
     if (isNaN(timeInSeconds)) return '0:00';
@@ -113,6 +114,13 @@ export default function HlsVideoPlayer({ src, className, autoPlayOnScroll, objec
     }
   };
 
+  const handleSkip = (seconds: number) => {
+    if (videoRef.current) {
+      const newTime = videoRef.current.currentTime + seconds;
+      videoRef.current.currentTime = Math.max(0, Math.min(newTime, videoRef.current.duration));
+    }
+  };
+
   const toggleMute = () => {
     if (videoRef.current) {
       videoRef.current.muted = !isMuted;
@@ -151,6 +159,9 @@ export default function HlsVideoPlayer({ src, className, autoPlayOnScroll, objec
       // -1 means auto
       hlsRef.current.currentLevel = levelIndex;
       setCurrentLevel(levelIndex);
+      if (isPlaying && videoRef.current) {
+        videoRef.current.play().catch(console.error);
+      }
     }
   };
 
@@ -202,14 +213,23 @@ export default function HlsVideoPlayer({ src, className, autoPlayOnScroll, objec
         onLoadedMetadata={handleLoadedMetadata}
         onPlay={() => setIsPlaying(true)}
         onPause={() => setIsPlaying(false)}
+        onWaiting={() => setIsBuffering(true)}
+        onCanPlay={() => setIsBuffering(false)}
+        onPlaying={() => { setIsPlaying(true); setIsBuffering(false); }}
         controls={false}
       >
         {children}
       </video>
+
+      {isBuffering && (
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+          <Loader2 className="w-12 h-12 text-white animate-spin drop-shadow-md" />
+        </div>
+      )}
       
       {/* Controls Overlay */}
       <div 
-        className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-4 transition-opacity duration-300 ${showControls ? 'opacity-100' : 'opacity-0'}`}
+        className={`video-controls absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-4 transition-opacity duration-300 ${showControls ? 'opacity-100' : 'opacity-0'}`}
       >
         {/* Progress Bar */}
         <div 
@@ -227,8 +247,14 @@ export default function HlsVideoPlayer({ src, className, autoPlayOnScroll, objec
         {/* Controls Row */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
+            <button onClick={() => handleSkip(-5)} className="text-white hover:text-brand-medium transition-colors" title="Rewind 5s">
+              <Rewind className="w-4 h-4 sm:w-5 sm:h-5" />
+            </button>
             <button onClick={togglePlay} className="text-white hover:text-brand-medium transition-colors">
               {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
+            </button>
+            <button onClick={() => handleSkip(5)} className="text-white hover:text-brand-medium transition-colors" title="Forward 5s">
+              <FastForward className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
             <button onClick={toggleMute} className="text-white hover:text-brand-medium transition-colors">
               {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}

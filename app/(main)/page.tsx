@@ -50,8 +50,8 @@ export default function HomePage() {
 
   const [createPost, { isLoading: isPublishing }] = useCreatePostMutation();
 
-  const { data: notificationData } = useGetNotificationsUnreadCountQuery(undefined, { skip: !isAuthenticated, pollingInterval: 30000 });
-  const { data: chatData } = useGetChatUnreadCountQuery(undefined, { skip: !isAuthenticated, pollingInterval: 30000 });
+  const { data: notificationData } = useGetNotificationsUnreadCountQuery(undefined, { skip: !isAuthenticated });
+  const { data: chatData } = useGetChatUnreadCountQuery(undefined, { skip: !isAuthenticated });
   
   const unreadCount = notificationData?.count || 0;
   const chatUnreadCount = chatData?.count || 0;
@@ -70,9 +70,9 @@ export default function HomePage() {
   useEffect(() => {
     if (!feedData?.data) return;
 
-    const normalized = feedData.data.map((p) =>
-      normalizeFeedPost(p as unknown as Record<string, unknown>)
-    );
+    const normalized = feedData.data
+      .map((p) => normalizeFeedPost(p as unknown as Record<string, unknown>))
+      .filter((p) => p.postType !== 'reel');
 
     if (page === 1) {
       setPosts(normalized);

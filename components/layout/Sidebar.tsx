@@ -43,8 +43,8 @@ export default function Sidebar() {
   
   const isCollapsed = useAppSelector((state) => state.ui.isSidebarCollapsed);
   
-  const { data: notificationData } = useGetNotificationsUnreadCountQuery(undefined, { skip: !isAuthenticated, pollingInterval: 30000 });
-  const { data: chatData } = useGetChatUnreadCountQuery(undefined, { skip: !isAuthenticated, pollingInterval: 30000 });
+  const { data: notificationData } = useGetNotificationsUnreadCountQuery(undefined, { skip: !isAuthenticated });
+  const { data: chatData } = useGetChatUnreadCountQuery(undefined, { skip: !isAuthenticated });
   
   const unreadCount = notificationData?.count || 0;
   const chatUnreadCount = chatData?.count || 0;
