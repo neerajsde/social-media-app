@@ -8,9 +8,10 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 interface HlsVideoPlayerProps extends React.VideoHTMLAttributes<HTMLVideoElement> {
   src: string;
   autoPlayOnScroll?: boolean;
+  objectFit?: 'cover' | 'contain' | 'fill';
 }
 
-export default function HlsVideoPlayer({ src, className, autoPlayOnScroll, ...props }: HlsVideoPlayerProps) {
+export default function HlsVideoPlayer({ src, className, autoPlayOnScroll, objectFit = 'contain', ...props }: HlsVideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const hlsRef = useRef<Hls | null>(null);
@@ -195,7 +196,7 @@ export default function HlsVideoPlayer({ src, className, autoPlayOnScroll, ...pr
       <video 
         ref={videoRef} 
         {...videoProps}
-        className="w-full h-full cursor-pointer"
+        className={`w-full h-full cursor-pointer object-${objectFit}`}
         onClick={toggleControls}
         onTimeUpdate={handleTimeUpdate}
         onLoadedMetadata={handleLoadedMetadata}
