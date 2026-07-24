@@ -101,7 +101,7 @@ export default function PostHeader({ post, onEditClick }: PostHeaderProps) {
 
   return (
     <>
-      <div className="flex items-center justify-between gap-3 p-3 sm:p-4 border-b border-white/5 bg-transparent">
+      <div className="flex items-center justify-between gap-3 p-3 sm:p-4 bg-transparent">
         <div className="flex items-center gap-3 min-w-0">
           <Link href={`/profile/${author.username}`} className="shrink-0">
             <Avatar className="w-10 h-10 ring-1 ring-border/20 hover:ring-border/40 transition-all duration-200">

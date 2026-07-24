@@ -16,8 +16,8 @@ import LoginRequiredDialog from './LoginRequiredDialog';
 import CommentInput from './CommentInput';
 import { useRouter } from 'next/navigation';
 import PostCommentsSheet from './PostCommentsSheet';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
+import MarkdownRenderer from './MarkdownRenderer';
+import EditPostDialog from './EditPostDialog';
 
 interface PostCardProps {
   post: Post;
@@ -134,8 +134,17 @@ export default function PostCard({ post, showMedia = true }: PostCardProps) {
     setShowShareDialog(true);
   };
 
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+
   const hasMedia = (post.images && post.images.length > 0) || post.video || post.mediaUrl || post.thumbnailUrl;
   const actuallyShowMedia = showMedia && hasMedia;
+
+  const MAX_CHARS = actuallyShowMedia ? 150 : 500;
+  const isLongContent = post.content && post.content.length > MAX_CHARS;
+  const displayContent = isLongContent && !isExpanded 
+    ? post.content!.substring(0, MAX_CHARS) + '...'
+    : post.content;
 
   const handleCardClick = (e: React.MouseEvent) => {
     const target = e.target as HTMLElement;
@@ -160,26 +169,26 @@ export default function PostCard({ post, showMedia = true }: PostCardProps) {
     <>
       <Card 
         onClick={handleCardClick}
-        className="border-white/5 bg-transparent hover:bg-white/[0.02] transition-all duration-300 rounded-2xl overflow-hidden cursor-pointer"
+        className="border-0 ring-0 shadow-none bg-transparent hover:bg-white/[0.02] transition-all duration-300 rounded-none overflow-hidden cursor-pointer border-b border-white/[0.06]"
       >
         <CardContent className="p-0">
           {/* Header */}
-          <PostHeader post={post} />
+          <PostHeader post={post} onEditClick={() => setShowEditDialog(true)} />
 
           {/* Content if NO Media */}
           {!actuallyShowMedia && (
             <div className="px-4 py-3 space-y-2">
               {post.content && (
-                <div className="text-[15px] sm:text-base leading-relaxed text-foreground break-words">
-                  <ReactMarkdown 
-                    remarkPlugins={[remarkGfm]}
-                    components={{
-                      a: ({node, ...props}) => <a className="text-brand-dark dark:text-brand-medium hover:underline font-medium" {...props} />,
-                      p: ({node, ...props}) => <p className="whitespace-pre-wrap mb-2 last:mb-0" {...props} />
-                    }}
-                  >
-                    {post.content}
-                  </ReactMarkdown>
+                <div className="text-[15px] sm:text-base leading-relaxed text-foreground break-words relative">
+                  <MarkdownRenderer content={displayContent!} />
+                  {isLongContent && (
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); setIsExpanded(!isExpanded); }}
+                      className="text-muted-foreground hover:text-brand-medium font-semibold text-sm ml-1 transition-colors"
+                    >
+                      {isExpanded ? 'less' : 'more'}
+                    </button>
+                  )}
                 </div>
               )}
 
@@ -220,19 +229,19 @@ export default function PostCard({ post, showMedia = true }: PostCardProps) {
           {actuallyShowMedia && (
             <div className="px-4 pb-2 space-y-1 mt-1">
               {post.content && (
-                <div className="text-[14px] leading-relaxed text-foreground break-words">
+                <div className="text-[14px] leading-relaxed text-foreground break-words relative">
                   <span className="font-semibold mr-1.5 hover:underline cursor-pointer">
                     {post.author?.username || post.user?.username || 'anonymous'}
                   </span>
-                  <ReactMarkdown 
-                    remarkPlugins={[remarkGfm]}
-                    components={{
-                      a: ({node, ...props}) => <a className="text-brand-dark dark:text-brand-medium hover:underline font-medium" {...props} />,
-                      p: ({node, ...props}) => <span className="whitespace-pre-wrap" {...props} />
-                    }}
-                  >
-                    {post.content}
-                  </ReactMarkdown>
+                  <MarkdownRenderer content={displayContent!} inline />
+                  {isLongContent && (
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); setIsExpanded(!isExpanded); }}
+                      className="text-muted-foreground hover:text-brand-medium font-semibold ml-1 transition-colors"
+                    >
+                      {isExpanded ? 'less' : 'more'}
+                    </button>
+                  )}
                 </div>
               )}
 
@@ -282,6 +291,7 @@ export default function PostCard({ post, showMedia = true }: PostCardProps) {
 
       <SharePostDialog postId={post.id} open={showShareDialog} onOpenChange={setShowShareDialog} />
       <LoginRequiredDialog open={showAuthDialog} onOpenChange={setShowAuthDialog} />
+      <EditPostDialog post={post} open={showEditDialog} onOpenChange={setShowEditDialog} />
       <PostCommentsSheet postId={post.id} open={showCommentsSheet} onOpenChange={setShowCommentsSheet} />
     </>
   );

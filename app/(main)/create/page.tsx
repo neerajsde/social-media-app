@@ -11,8 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { toast } from 'sonner';
 import { useCreatePostMutation, useGeneratePostPresignedUrlMutation } from '@/lib/features/post/postApi';
 import { useLazySearchQuery } from '@/lib/features/search/searchApi';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
+import MarkdownRenderer from '@/components/shared/MarkdownRenderer';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAppSelector, useAppDispatch } from '@/lib/hooks';
 import { startVideoUpload } from '@/lib/features/post/videoUploadSlice';
@@ -346,49 +345,96 @@ export default function CreatePostPage() {
             </div>
 
             {isPreviewMode ? (
-              <div className="min-h-[120px] p-4 bg-black/30 rounded-2xl border border-white/5 prose prose-sm dark:prose-invert max-w-none text-white/90">
+              <div className="min-h-[180px] p-4 bg-black/30 rounded-2xl border border-white/5 prose prose-sm dark:prose-invert max-w-none text-white/90">
                 {content ? (
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
+                  <MarkdownRenderer content={content} />
                 ) : (
                   <span className="text-white/40 italic">Nothing to preview</span>
                 )}
               </div>
             ) : (
-              <Textarea
-                placeholder={
-                  postType === 'text'
-                    ? 'What\'s on your mind? Start typing... (Markdown supported, type @ to mention)'
-                    : 'Add a captivating caption to your post... (Markdown supported, type @ to mention)'
-                }
-                value={content}
-                onChange={(e) => {
-                  const val = e.target.value;
-                  setContent(val);
-                  
-                  // Mention detection
-                  const cursorPosition = e.target.selectionStart;
-                  const textBeforeCursor = val.slice(0, cursorPosition);
-                  const match = textBeforeCursor.match(/@([a-zA-Z0-9_]*)$/);
-                  
-                  if (match) {
-                    const query = match[1];
-                    setMentionQuery(query);
-                    setMentionIndex({ start: cursorPosition - query.length - 1, end: cursorPosition });
-                    
-                    searchTrigger({ q: query, type: 'account', limit: 5 }).unwrap()
-                      .then((res) => {
-                        if (res.success && res.data) {
-                          setMentionResults(res.data);
-                        }
-                      })
-                      .catch((err) => console.error("Mention search failed", err));
-                  } else {
-                    setMentionQuery(null);
-                    setMentionResults([]);
+              <>
+                {/* Markdown Toolbar */}
+                <div className="flex items-center gap-1 flex-wrap bg-black/20 rounded-xl px-2 py-1.5 border border-white/5">
+                  {[
+                    { label: 'B', title: 'Bold', before: '**', after: '**' },
+                    { label: 'I', title: 'Italic', before: '*', after: '*' },
+                    { label: 'H', title: 'Heading', before: '## ', after: '' },
+                    { label: '~', title: 'Strikethrough', before: '~~', after: '~~' },
+                    { label: '🔗', title: 'Link', before: '[', after: '](url)' },
+                    { label: '•', title: 'List', before: '- ', after: '' },
+                    { label: '<>', title: 'Code', before: '`', after: '`' },
+                    { label: '❝', title: 'Quote', before: '> ', after: '' },
+                  ].map((btn) => (
+                    <button
+                      key={btn.title}
+                      type="button"
+                      title={btn.title}
+                      onClick={() => {
+                        const textarea = document.getElementById('post-content-textarea') as HTMLTextAreaElement;
+                        if (!textarea) return;
+                        const start = textarea.selectionStart;
+                        const end = textarea.selectionEnd;
+                        const selected = content.substring(start, end);
+                        const replacement = `${btn.before}${selected || btn.title}${btn.after}`;
+                        const newContent = content.substring(0, start) + replacement + content.substring(end);
+                        setContent(newContent);
+                        setTimeout(() => {
+                          textarea.focus();
+                          const cursorPos = start + btn.before.length + (selected || btn.title).length + btn.after.length;
+                          textarea.setSelectionRange(cursorPos, cursorPos);
+                        }, 0);
+                      }}
+                      className={`w-8 h-8 flex items-center justify-center rounded-lg text-xs font-bold text-white/50 hover:text-white hover:bg-white/10 transition-colors ${
+                        btn.label === 'B' ? 'font-extrabold' : btn.label === 'I' ? 'italic' : ''
+                      }`}
+                    >
+                      {btn.label}
+                    </button>
+                  ))}
+                  <div className="ml-auto text-[11px] text-white/25 font-mono tabular-nums pr-1">
+                    {content.length}/5000
+                  </div>
+                </div>
+
+                <Textarea
+                  id="post-content-textarea"
+                  placeholder={
+                    postType === 'text'
+                      ? 'What\'s on your mind? Markdown supported — type @ to mention someone'
+                      : 'Add a captivating caption... Markdown supported — type @ to mention'
                   }
-                }}
-                className="min-h-[120px] resize-none border-0 bg-transparent p-2 focus-visible:ring-0 text-base sm:text-lg placeholder:text-white/30 text-white/90 font-sans"
-              />
+                  value={content}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val.length > 5000) return;
+                    setContent(val);
+                    
+                    // Mention detection
+                    const cursorPosition = e.target.selectionStart;
+                    const textBeforeCursor = val.slice(0, cursorPosition);
+                    const match = textBeforeCursor.match(/@([a-zA-Z0-9_]*)$/);
+                    
+                    if (match) {
+                      const query = match[1];
+                      setMentionQuery(query);
+                      setMentionIndex({ start: cursorPosition - query.length - 1, end: cursorPosition });
+                      
+                      searchTrigger({ q: query, type: 'account', limit: 5 }).unwrap()
+                        .then((res) => {
+                          if (res.success && res.data) {
+                            setMentionResults(res.data);
+                          }
+                        })
+                        .catch((err) => console.error("Mention search failed", err));
+                    } else {
+                      setMentionQuery(null);
+                      setMentionResults([]);
+                    }
+                  }}
+                  className="min-h-[180px] resize-y border border-white/[0.06] bg-black/20 rounded-xl p-4 focus-visible:ring-1 focus-visible:ring-[#00D084]/40 focus-visible:border-[#00D084]/30 text-[15px] placeholder:text-white/25 text-white/90 font-mono leading-relaxed transition-all"
+                />
+              </>
             )}
             
             {/* Mention Dropdown */}

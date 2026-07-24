@@ -145,7 +145,7 @@ export default function PostActions({
 
   return (
     <>
-      <div className="flex flex-col border-t border-border/10 pt-2 pb-2">
+      <div className="flex flex-col pt-1 pb-2">
         {/* Action Row */}
         <div className="flex items-center justify-between px-4 py-1">
           <div className="flex items-center gap-4">

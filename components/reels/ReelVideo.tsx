@@ -8,15 +8,19 @@ import { cn } from '@/lib/utils';
 interface ReelVideoProps extends React.VideoHTMLAttributes<HTMLVideoElement> {
   src: string;
   isActive: boolean;
+  globalMuted?: boolean;
+  onMuteChange?: (muted: boolean) => void;
 }
 
-export default function ReelVideo({ src, isActive, className, ...props }: ReelVideoProps) {
+export default function ReelVideo({ src, isActive, className, globalMuted, onMuteChange, ...props }: ReelVideoProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const hlsRef = useRef<Hls | null>(null);
 
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isMuted, setIsMuted] = useState(props.muted !== undefined ? props.muted : true);
+  const [localMuted, setLocalMuted] = useState(props.muted !== undefined ? props.muted : true);
+  const isMuted = globalMuted !== undefined ? globalMuted : localMuted;
+  
   const [progress, setProgress] = useState(0);
   const [showControls, setShowControls] = useState(true);
   const [isBuffering, setIsBuffering] = useState(true);
@@ -88,11 +92,19 @@ export default function ReelVideo({ src, isActive, className, ...props }: ReelVi
 
   const toggleMute = (e?: React.MouseEvent) => {
     e?.stopPropagation();
-    if (videoRef.current) {
-      videoRef.current.muted = !isMuted;
-      setIsMuted(!isMuted);
+    const newMuted = !isMuted;
+    if (onMuteChange) {
+      onMuteChange(newMuted);
+    } else {
+      setLocalMuted(newMuted);
     }
   };
+
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.muted = isMuted;
+    }
+  }, [isMuted]);
 
   const handleTimeUpdate = () => {
     if (videoRef.current) {
