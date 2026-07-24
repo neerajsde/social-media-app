@@ -43,10 +43,10 @@ export default function MobileNav() {
     setOpen(false);
   }, [pathname]);
 
-  const { data: chatData } = useGetChatUnreadCountQuery(undefined, { skip: !isAuthenticated, pollingInterval: 30000 });
+  const { data: chatData } = useGetChatUnreadCountQuery(undefined, { skip: !isAuthenticated });
   const chatUnreadCount = chatData?.count || 0;
   
-  const { data: notifData } = useGetNotificationUnreadCountQuery(undefined, { skip: !isAuthenticated, pollingInterval: 30000 });
+  const { data: notifData } = useGetNotificationUnreadCountQuery(undefined, { skip: !isAuthenticated });
   const unreadCount = notifData?.count || 0;
 
   return (

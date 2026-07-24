@@ -6,6 +6,7 @@ import { useAppDispatch, useAppSelector } from '../lib/hooks'
 import { useGetProfileQuery } from '../lib/features/user/userApi'
 import { setUser, logout, setCredentials, setAuthInitialized } from '../lib/features/auth/authSlice'
 import { restoreVideoUploadState } from '../lib/features/post/videoUploadSlice'
+import { SocketProvider } from '../components/providers/SocketProvider'
 
 function AuthInit({ children }: { children: React.ReactNode }) {
   const dispatch = useAppDispatch();
@@ -97,7 +98,9 @@ export default function StoreProvider({
 
   return (
     <Provider store={storeRef.current}>
-      <AuthInit>{children}</AuthInit>
+      <SocketProvider>
+        <AuthInit>{children}</AuthInit>
+      </SocketProvider>
     </Provider>
   )
 }
