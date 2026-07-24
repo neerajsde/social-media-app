@@ -82,7 +82,7 @@ export default function EditPostDialog({ post, open, onOpenChange }: EditPostDia
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-3">
               <Label className="text-sm font-semibold text-foreground/80">Visibility</Label>
-              <Select value={visibility} onValueChange={setVisibility}>
+              <Select value={visibility} onValueChange={(val) => val && setVisibility(val as any)}>
                 <SelectTrigger className="bg-background border-border/50 rounded-xl h-11 focus:ring-brand-medium/50">
                   <SelectValue />
                 </SelectTrigger>
@@ -96,7 +96,7 @@ export default function EditPostDialog({ post, open, onOpenChange }: EditPostDia
             
             <div className="space-y-3">
               <Label className="text-sm font-semibold text-foreground/80">Status</Label>
-              <Select value={status} onValueChange={setStatus}>
+              <Select value={status} onValueChange={(val) => val && setStatus(val as any)}>
                 <SelectTrigger className="bg-background border-border/50 rounded-xl h-11 focus:ring-brand-medium/50">
                   <SelectValue />
                 </SelectTrigger>
