@@ -26,6 +26,9 @@ export default function ReelsFeed({ reels, isLoading, hasMore, onLoadMore, class
   const [commentsReelId, setCommentsReelId] = useState<string | null>(null);
   const [shareReelId, setShareReelId] = useState<string | null>(null);
   const [authRequired, setAuthRequired] = useState(false);
+  
+  // Audio state
+  const [globalMuted, setGlobalMuted] = useState(false);
 
   // Keyboard navigation
   useEffect(() => {
@@ -128,6 +131,8 @@ export default function ReelsFeed({ reels, isLoading, hasMore, onLoadMore, class
               onCommentClick={() => setCommentsReelId(reel.id)}
               onShareClick={() => setShareReelId(reel.id)}
               onAuthRequired={() => setAuthRequired(true)}
+              globalMuted={globalMuted}
+              onMuteChange={setGlobalMuted}
             />
           </div>
         </div>

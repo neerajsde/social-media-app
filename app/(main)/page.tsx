@@ -193,7 +193,7 @@ export default function HomePage() {
 
       {/* Feed Composer */}
       {isAuthenticated && user && (
-        <div className="p-4 mt-4 mx-3 sm:mx-4 border border-border/20 bg-card rounded-2xl flex gap-3 shadow-sm">
+        <div className="px-4 py-4 border-b border-white/[0.06] flex gap-3">
           <Avatar className="w-9 h-9 sm:w-10 sm:h-10 border border-border shrink-0">
             <AvatarImage src={user.avatarUrl} alt={user.username} />
             <AvatarFallback className="bg-brand-medium/20 text-brand-dark text-xs">
@@ -209,7 +209,7 @@ export default function HomePage() {
               rows={2}
               className="w-full bg-transparent border-0 outline-none text-sm placeholder:text-muted-foreground resize-none focus:ring-0 min-h-[56px] sm:min-h-[64px] font-sans disabled:opacity-50"
             />
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-t border-border/50 pt-2.5 sm:pt-3">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-t border-white/[0.04] pt-2.5 sm:pt-3">
               <div className="flex items-center gap-0.5 sm:gap-1.5 text-brand-dark dark:text-brand-medium">
                 <Button
                   variant="ghost"
@@ -259,7 +259,7 @@ export default function HomePage() {
       )}
 
       {/* Feed */}
-      <div className="p-3 sm:p-4 space-y-3 sm:space-y-4">
+      <div className="space-y-0">
         {isLoading && page === 1 ? (
           <div className="space-y-4 pt-2">
             <PostSkeleton />

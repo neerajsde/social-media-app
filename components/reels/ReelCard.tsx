@@ -21,6 +21,8 @@ interface ReelCardProps {
   onCommentClick: () => void;
   onShareClick: () => void;
   onAuthRequired: () => void;
+  globalMuted?: boolean;
+  onMuteChange?: (muted: boolean) => void;
 }
 
 export default function ReelCard({
@@ -28,7 +30,9 @@ export default function ReelCard({
   isActive,
   onCommentClick,
   onShareClick,
-  onAuthRequired
+  onAuthRequired,
+  globalMuted,
+  onMuteChange
 }: ReelCardProps) {
   const { isAuthenticated, user: currentUser } = useAppSelector((state) => state.auth);
   
@@ -140,6 +144,8 @@ export default function ReelCard({
         src={post.video?.hlsMasterKey || post.video?.originalVideo || ''} 
         isActive={isActive}
         poster={post.video?.thumbnail || ''}
+        globalMuted={globalMuted}
+        onMuteChange={onMuteChange}
       />
 
       <ReelInfo 
