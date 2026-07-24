@@ -166,7 +166,7 @@ export default function ReelVideo({ src, isActive, className, globalMuted, onMut
       <video 
         ref={videoRef} 
         {...videoProps}
-        className="w-full h-full object-contain bg-black cursor-pointer"
+        className="w-full h-full object-cover bg-black cursor-pointer"
         onTimeUpdate={handleTimeUpdate}
         onPlay={() => setIsPlaying(true)}
         onPause={() => setIsPlaying(false)}
