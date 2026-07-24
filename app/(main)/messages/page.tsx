@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Send, Search, MessageSquare, Phone, Video, Info, ArrowLeft, Loader2, PenSquare, Trash2 } from 'lucide-react';
+import { Send, Search, MessageSquare, Phone, Video, Info, ArrowLeft, Loader2, PenSquare, Trash2, Paperclip, FileText, Image as ImageIcon, Download } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,7 +11,7 @@ import { useMediaQuery } from '@/hooks/use-media-query';
 import ListSkeleton from '@/components/skeletons/ListSkeleton';
 import MessageSkeleton from '@/components/skeletons/MessageSkeleton';
 import SharedPostCard from '@/components/shared/SharedPostCard';
-import { useGetConversationsQuery, useGetMessagesQuery, useSendMessageMutation, useMarkConversationAsReadMutation, useClearChatMutation } from '@/lib/features/chat/chatApi';
+import { useGetConversationsQuery, useGetMessagesQuery, useSendMessageMutation, useMarkConversationAsReadMutation, useClearChatMutation, useGetChatPresignedUrlMutation } from '@/lib/features/chat/chatApi';
 import { useSearchQuery } from '@/lib/features/search/searchApi';
 import { useSelector } from 'react-redux';
 import type { RootState } from '@/lib/store';
@@ -37,13 +37,16 @@ export default function MessagesPage() {
   );
 
   const [sendMessage, { isLoading: isSending }] = useSendMessageMutation();
+  const [getPresignedUrl] = useGetChatPresignedUrlMutation();
   const [markAsRead] = useMarkConversationAsReadMutation();
   const [clearChat, { isLoading: isClearing }] = useClearChatMutation();
   const { socket } = useSocket();
   const [isPeerTyping, setIsPeerTyping] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const activeConvRef = useRef<any>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Keep ref in sync with state so socket handlers don't get stale closures
   activeConvRef.current = activeConv;
@@ -136,6 +139,82 @@ export default function MessagesPage() {
     }
   };
 
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !activeConv || !participant) return;
+
+    // Allowed: Images and PDFs
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif', 'application/pdf'];
+    if (!allowedTypes.includes(file.type)) {
+      toast.error('Only images and PDFs are allowed');
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) { // 10MB limit
+      toast.error('File size must be under 10MB');
+      return;
+    }
+
+    try {
+      setIsUploading(true);
+      
+      const { uploadUrl, fileKey } = await getPresignedUrl({ mimeType: file.type }).unwrap();
+      
+      const response = await fetch(uploadUrl, {
+        method: 'PUT',
+        body: file,
+        headers: {
+          'Content-Type': file.type,
+        },
+      });
+
+      if (!response.ok) throw new Error('Upload failed');
+
+      const mediaType = file.type.startsWith('image/') ? 'image' : 'pdf';
+
+      const sendRes = await sendMessage({
+        receiverId: participant.id,
+        conversationId: activeConv.id,
+        fileKey,
+        mediaType,
+      }).unwrap();
+
+      if (activeConv.id.startsWith('new-')) {
+         setActiveConv({ ...activeConv, id: sendRes.data.conversationId });
+      }
+
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    } catch (err) {
+      console.error('File upload error', err);
+      toast.error('Failed to send file');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleDownload = async (url: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    try {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error('Network response was not ok');
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      const filename = url.split('/').pop() || 'download';
+      link.setAttribute('download', filename);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      console.error('Download failed', error);
+      // Fallback
+      window.open(url, '_blank');
+    }
+  };
+
   const handleClearChat = async () => {
     if (!activeConv || activeConv.id.startsWith('new-') || !window.confirm('Are you sure you want to clear this chat?')) return;
     try {
@@ -223,7 +302,23 @@ export default function MessagesPage() {
                   filteredConversations.map((conv: any) => {
                     const peer = conv.participants.find((p: any) => p.id !== currentUser?.id) || conv.participants[0];
                     const isSelected = activeConv?.id === conv.id;
-                    const lastMessageContent = conv.lastMessage?.content || (conv.lastMessage?.sharedPostId ? 'Shared a post' : '');
+                    let lastMessageContent: React.ReactNode = conv.lastMessage?.content;
+                    if (!lastMessageContent) {
+                      if (conv.lastMessage?.sharedPostId) lastMessageContent = 'Shared a post';
+                      else if (conv.lastMessage?.mediaType === 'image') {
+                        lastMessageContent = (
+                          <span className="flex items-center gap-1">
+                            <ImageIcon className="w-3 h-3 shrink-0" /> Image
+                          </span>
+                        );
+                      } else if (conv.lastMessage?.mediaType === 'pdf') {
+                        lastMessageContent = (
+                          <span className="flex items-center gap-1">
+                            <FileText className="w-3 h-3 shrink-0" /> PDF Document
+                          </span>
+                        );
+                      }
+                    }
                     const peerName = peer?.first_name || peer?.last_name
                       ? `${peer.first_name || ''} ${peer.last_name || ''}`.trim()
                       : peer?.username || 'Unknown User';
@@ -426,11 +521,45 @@ export default function MessagesPage() {
                                   className={cn(
                                     'rounded-2xl px-4 py-2.5 text-[14px] leading-relaxed',
                                     isSelf
-                                      ? 'bg-brand-dark text-white rounded-br-md'
+                                      ? 'bg-[#2a2a2a] border border-white/5 text-white rounded-br-md'
                                       : 'bg-[#1e1e1e] border border-border/30 text-foreground rounded-bl-md'
                                   )}
                                 >
-                                  <p className="whitespace-pre-wrap break-words">{msg.content}</p>
+                                  {msg.mediaUrl && (
+                                    <div className="mb-2 group relative">
+                                      {msg.mediaType === 'image' ? (
+                                        <div className="relative rounded-lg overflow-hidden border border-white/10 max-w-[240px]">
+                                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                                          <img src={msg.mediaUrl} alt="Image attachment" className="w-full h-auto object-cover" />
+                                          <button
+                                            onClick={(e) => handleDownload(msg.mediaUrl, e)}
+                                            className="absolute top-2 right-2 bg-black/60 hover:bg-black/80 text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                                            title="Download image"
+                                          >
+                                            <Download className="w-4 h-4" />
+                                          </button>
+                                        </div>
+                                      ) : msg.mediaType === 'pdf' ? (
+                                        <div className="relative">
+                                          <a href={msg.mediaUrl} target="_blank" rel="noopener noreferrer" className={cn("flex items-center gap-2 p-3 rounded-lg border", isSelf ? "bg-white/10 border-white/20 hover:bg-white/20" : "bg-black/20 border-border/50 hover:bg-black/40", "transition-colors pr-12")}>
+                                            <FileText className="w-8 h-8 shrink-0 text-brand-medium" />
+                                            <div className="flex-1 min-w-0">
+                                              <p className="text-sm font-medium truncate">PDF Document</p>
+                                              <p className={cn("text-[10px] uppercase font-semibold", isSelf ? "text-white/70" : "text-muted-foreground")}>Click to view</p>
+                                            </div>
+                                          </a>
+                                          <button
+                                            onClick={(e) => handleDownload(msg.mediaUrl, e)}
+                                            className="absolute top-1/2 -translate-y-1/2 right-3 bg-black/40 hover:bg-black/60 text-white p-1.5 rounded-full transition-colors"
+                                            title="Download PDF"
+                                          >
+                                            <Download className="w-4 h-4" />
+                                          </button>
+                                        </div>
+                                      ) : null}
+                                    </div>
+                                  )}
+                                  {msg.content && <p className="whitespace-pre-wrap break-words">{msg.content}</p>}
                                   <p
                                     className={cn(
                                       'text-[10px] mt-1.5 text-right tabular-nums',
@@ -472,18 +601,35 @@ export default function MessagesPage() {
             {/* Message Input */}
             <div className="shrink-0 px-5 py-4 border-t border-border/40 bg-[#1a1a1a]">
               <form onSubmit={handleSendMessage} className="flex items-center gap-3 max-w-3xl mx-auto">
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  className="hidden"
+                  accept="image/jpeg,image/png,image/webp,image/gif,application/pdf"
+                  onChange={handleFileSelect}
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="w-10 h-10 rounded-xl text-muted-foreground hover:text-foreground shrink-0"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isUploading || isSending}
+                >
+                  {isUploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Paperclip className="w-4 h-4" />}
+                </Button>
                 <Input
                   placeholder="Type a message..."
                   value={inputText}
                   onChange={handleInputChange}
                   className="flex-1 h-10 rounded-xl bg-[#252525] border-transparent text-sm placeholder:text-muted-foreground/40 focus-visible:ring-1 focus-visible:ring-brand-dark/40 focus-visible:border-brand-dark/30"
-                  disabled={isSending}
+                  disabled={isSending || isUploading}
                 />
                 <Button
                   type="submit"
                   size="icon"
-                  disabled={isSending || !inputText.trim()}
-                  className="w-10 h-10 rounded-xl bg-brand-dark hover:bg-brand-dark/90 text-white shrink-0 disabled:opacity-30 transition-opacity"
+                  disabled={isSending || isUploading || (!inputText.trim() && !isUploading)}
+                  className="w-10 h-10 rounded-xl bg-[#2a2a2a] hover:bg-[#333333] border border-white/5 text-white shrink-0 disabled:opacity-30 transition-colors"
                 >
                   {isSending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
                 </Button>

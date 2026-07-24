@@ -10,13 +10,20 @@ export const chatApi = baseApi.injectEndpoints({
       query: (conversationId) => `/chat/${conversationId}/messages`,
       providesTags: (_result, _err, id) => [{ type: 'Chat', id }],
     }),
-    sendMessage: builder.mutation<{ success: boolean; data: any }, { receiverId: string; content?: string; sharedPostId?: string; conversationId?: string }>({
+    getChatPresignedUrl: builder.mutation<{ success: boolean; uploadUrl: string; fileKey: string }, { mimeType: string }>({
+      query: (body) => ({
+        url: '/chat/upload-url',
+        method: 'POST',
+        body,
+      }),
+    }),
+    sendMessage: builder.mutation<{ success: boolean; data: any }, { receiverId: string; content?: string; sharedPostId?: string; conversationId?: string; fileKey?: string; mediaType?: string }>({
       query: (body) => ({
         url: '/chat/message',
         method: 'POST',
         body,
       }),
-      async onQueryStarted({ conversationId, content, sharedPostId }, { dispatch, queryFulfilled, getState }) {
+      async onQueryStarted({ conversationId, content, sharedPostId, mediaType }, { dispatch, queryFulfilled, getState }) {
         // Only optimistically update if we have a real conversationId
         if (!conversationId || conversationId.startsWith('new-')) return;
 
@@ -30,6 +37,8 @@ export const chatApi = baseApi.injectEndpoints({
           senderId,
           content: content || '',
           sharedPostId: sharedPostId || null,
+          mediaUrl: null, // Temporary media will not show immediately (or we could show a local preview if we wanted)
+          mediaType: mediaType || null,
           createdAt: new Date().toISOString(),
           isRead: false,
         };
@@ -88,6 +97,7 @@ export const {
   useGetConversationsQuery,
   useGetMessagesQuery,
   useSendMessageMutation,
+  useGetChatPresignedUrlMutation,
   useGetChatUnreadCountQuery,
   useMarkConversationAsReadMutation,
   useClearChatMutation,
